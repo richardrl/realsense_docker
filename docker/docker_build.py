@@ -41,19 +41,17 @@ def execute_build(args):
 
 
 if __name__ == '__main__':
-    default_image_name = "richardrl/realsense_docker"
-
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-i', '--image', type=str,
-                        default=default_image_name,
+                        default="richardrl/realsense_docker_source",
                         help='name for new docker image')
 
     parser.add_argument('--no_cache', action='store_true',
                         help='0 if should build without using cache')
 
     parser.add_argument('-f', '--docker_file', type=str,
-                        default='realsense_docker.dockerfile',
+                        default='realsense_docker_from_source.dockerfile',
                         help='which Dockerfile to build from')
 
     parser.add_argument('-d', '--dry_run', action='store_true',

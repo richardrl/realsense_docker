@@ -51,3 +51,11 @@ WORKDIR /librealsense
 #RUN ./scripts/setup_udev_rules.sh
 RUN mkdir -p /etc/udev/rules.d/
 RUN cp ./config/99-realsense-libusb.rules /etc/udev/rules.d/
+
+RUN pip3 install --upgrade setuptools
+
+RUN pip3 install --upgrade pip
+
+RUN pip3 install --upgrade numpy scipy opencv-python matplotlib
+
+RUN apt-get install -y python3-tk
