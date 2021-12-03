@@ -52,10 +52,14 @@ WORKDIR /librealsense
 RUN mkdir -p /etc/udev/rules.d/
 RUN cp ./config/99-realsense-libusb.rules /etc/udev/rules.d/
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN pip3 install --upgrade setuptools
 
 RUN pip3 install --upgrade pip
 
-RUN pip3 install --upgrade numpy scipy opencv-python matplotlib
+RUN pip3 install --upgrade numpy scipy matplotlib
+
+RUN pip3 install opencv-contrib-python
 
 RUN apt-get install -y python3-tk
