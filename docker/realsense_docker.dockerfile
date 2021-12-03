@@ -33,5 +33,4 @@ RUN git clone https://github.com/IntelRealSense/librealsense.git
 WORKDIR librealsense
 
 RUN ./scripts/setup_udev_rules.sh
-
 #RUN ./scripts/patch-realsense-ubuntu-lts.sh

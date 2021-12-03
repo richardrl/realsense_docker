@@ -1,7 +1,7 @@
 # note: if you have an existing container, this will simply sync into that container and not create
 # a new container
 
-IMAGE=richardrl/realsense_docker:latest
+IMAGE=richardrl/realsense_docker_source:latest
 XAUTH=/tmp/.docker.xauth
 if [ ! -f $XAUTH ]
 then
@@ -22,6 +22,7 @@ docker run -it \
     --env="XAUTHORITY=$XAUTH" \
     --volume="$XAUTH:$XAUTH" \
     --volume="$PWD/../:/root/bandu_v1_full_clean" \
+    --volume="/data/pulkitag/models/rli14/visual-pushing-grasping/:/root/vpg" \
     --privileged \
     --runtime=nvidia \
     --net=host \
