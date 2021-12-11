@@ -11,6 +11,12 @@ realsense_docker.dockerfile
 realsense_docker_from_source.dockerfile
 - You need to build from source to get the #include/realsense/rs.hpp working
 - OR figure out how to include that directory
+- You need to run andy's realsense.cpp to setup the tcp connection
+- https://dev.intelrealsense.com/docs/open-source-ethernet-networking-for-intel-realsense-depth-cameras
 
 
 # Camera Calibration
+checkerboard_offset_from_tool = 
+
+# Notes
+- Opencv does the axis as bgr instead of rgb

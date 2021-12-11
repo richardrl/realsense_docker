@@ -58,8 +58,28 @@ RUN pip3 install --upgrade setuptools
 
 RUN pip3 install --upgrade pip
 
+# andy zeng vpg stuff
 RUN pip3 install --upgrade numpy scipy matplotlib
 
 RUN pip3 install opencv-contrib-python
 
 RUN apt-get install -y python3-tk
+
+RUN pip3 install torch
+
+# rtde stuff
+
+#RUN add-apt-repository ppa:sdurobotics/ur-rtde
+#
+#RUN apt-get update
+#
+#RUN apt install librtde librtde-dev
+
+RUN pip3 install --user ur_rtde
+
+
+RUN apt install software-properties-common
+
+RUN add-apt-repository ppa:deadsnakes/ppa
+
+RUN apt install python3.9

@@ -27,5 +27,6 @@ docker run -it \
     --runtime=nvidia \
     --net=host \
     -e WANDB_API_KEY \
+    -e UR5_IP \
     ${IMAGE} \
     bash
