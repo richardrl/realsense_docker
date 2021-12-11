@@ -1,8 +1,30 @@
+import rtde_control
+import rtde_receive
+import os
+import numpy as np
+import robotiq_gripper
+
+
+rtde_c = rtde_control.RTDEControlInterface(os.environ['UR5_IP'])
+
+rtde_r = rtde_receive.RTDEReceiveInterface(os.environ['UR5_IP'])
+
+
 class Robot(object):
     def __init__(self, is_sim, obj_mesh_dir, num_obj, workspace_limits,
                  tcp_host_ip, tcp_port, rtc_host_ip, rtc_port,
                  is_testing, test_preset_cases, test_preset_file):
         self.workspace_limits = workspace_limits
+
+        from real.camera import Camera
+        self.camera = Camera()
+        self.cam_intrinsics = self.camera.intrinsics
+
+        # Load camera pose (from running calibrate.py), intrinsics and depth scale
+        # self.cam_pose = np.loadtxt('real/camera_pose.txt', delimiter=' ')
+        # self.cam_depth_scale = np.loadtxt('real/camera_depth_scale.txt', delimiter=' ')
+
+
         self.home_joint_config = [-(180.0 / 360.0) * 2 * np.pi, -(84.2 / 360.0) * 2 * np.pi,
                                   (112.8 / 360.0) * 2 * np.pi, -(119.7 / 360.0) * 2 * np.pi,
                                   -(90.0 / 360.0) * 2 * np.pi, 0.0]
@@ -19,7 +41,41 @@ class Robot(object):
         # Tool pose tolerance for blocking calls
         self.tool_pose_tolerance = [0.002, 0.002, 0.002, 0.01, 0.01, 0.01]
 
+        self.gripper = robotiq_gripper.RobotiqGripper()
+
+        self.gripper.connect(os.environ['UR5_IP'], 63352)
+
+        self.gripper.activate()
+
         self.close_gripper()
         self.go_home()
 
+    def open_gripper(self):
+        self.gripper.move_and_wait_for_pos(0, 255, 255)
+
     def close_gripper(self):
+        self.gripper.move_and_wait_for_pos(255, 255, 255)
+
+    def go_home(self):
+        rtde_c.moveJ(self.home_joint_config, speed=.1, acceleration=.01)
+
+    def get_camera_data(self):
+        color_img, depth_img = self.camera.get_data()
+        return color_img, depth_img
+
+    def move_to(self, tool_position, tool_orientation):
+        """
+        Move the ee
+        Args:
+            tool_position:
+            tool_orientation:
+
+        Returns:
+
+        """
+        target = np.concatenate([tool_position, tool_orientation])
+        # (x,y,z,rx,ry,rz)
+        rtde_c.moveL(target, self.tool_vel, self.tool_acc)
+
+    def move_joints(self, q_set):
+        rtde_c.moveJ(q_set, speed=self.joint_vel, acceleration=self.joint_acc)
