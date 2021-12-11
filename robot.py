@@ -3,6 +3,7 @@ import rtde_receive
 import os
 import numpy as np
 import robotiq_gripper
+from scipy.spatial.transform import Rotation as R
 
 
 rtde_c = rtde_control.RTDEControlInterface(os.environ['UR5_IP'])
@@ -13,12 +14,13 @@ rtde_r = rtde_receive.RTDEReceiveInterface(os.environ['UR5_IP'])
 class Robot(object):
     def __init__(self, is_sim, obj_mesh_dir, num_obj, workspace_limits,
                  tcp_host_ip, tcp_port, rtc_host_ip, rtc_port,
-                 is_testing, test_preset_cases, test_preset_file):
+                 is_testing, test_preset_cases, test_preset_file, load_camera=False):
         self.workspace_limits = workspace_limits
 
-        from real.camera import Camera
-        self.camera = Camera()
-        self.cam_intrinsics = self.camera.intrinsics
+        if load_camera:
+            from real.camera import Camera
+            self.camera = Camera()
+            self.cam_intrinsics = self.camera.intrinsics
 
         # Load camera pose (from running calibrate.py), intrinsics and depth scale
         # self.cam_pose = np.loadtxt('real/camera_pose.txt', delimiter=' ')
@@ -47,7 +49,7 @@ class Robot(object):
 
         self.gripper.activate()
 
-        self.close_gripper()
+        # self.close_gripper()
         self.go_home()
 
     def open_gripper(self):
@@ -57,11 +59,24 @@ class Robot(object):
         self.gripper.move_and_wait_for_pos(255, 255, 255)
 
     def go_home(self):
-        rtde_c.moveJ(self.home_joint_config, speed=.1, acceleration=.01)
+        rtde_c.moveJ(self.home_joint_config, speed=self.joint_vel, acceleration=self.joint_acc)
 
     def get_camera_data(self):
         color_img, depth_img = self.camera.get_data()
         return color_img, depth_img
+
+    def get_tcp_pose(self, print_euler=False):
+        """
+
+        Returns: (x,y,z,rx,ry,rz)
+
+        """
+        tcp_pose = rtde_r.getActualTCPPose()
+        if print_euler:
+            print(f"xyz euler: {R.from_rotvec(tcp_pose[3:6]).as_euler('xyz')}")
+            print(f"zyx euler: {R.from_rotvec(tcp_pose[3:6]).as_euler('zyx')}")
+
+        return tcp_pose
 
     def move_to(self, tool_position, tool_orientation):
         """

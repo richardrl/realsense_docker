@@ -9,6 +9,7 @@ from robot import Robot
 from scipy import optimize
 from mpl_toolkits.mplot3d import Axes3D
 import os
+import charuco_util
 
 
 # User options (change me)
@@ -17,8 +18,11 @@ tcp_host_ip = os.environ['UR5_IP'] # IP and port to robot arm as TCP client (UR5
 tcp_port = 30002
 rtc_host_ip = os.environ['UR5_IP'] # IP and port to robot arm as real-time client (UR5)
 rtc_port = 30003
-workspace_limits = np.asarray([[0.3, 0.748], [0.05, 0.4], [-0.2, -0.1]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
-calib_grid_step = 0.05
+
+# workspace_limits = np.asarray([[0.3, 0.748], [0.05, 0.4], [-0.2, -0.1]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
+
+workspace_limits = np.asarray([[0.4, 0.648], [-.25, 0.3], [-.08, .13]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
+calib_grid_step = 0.05 * 1
 # checkerboard_offset_from_tool = [0,-0.13,0.02]
 
 # position of the tool in the checkerboard frame
@@ -28,7 +32,7 @@ checkerboard_offset_from_tool = [0,-0.13,0.02]
 # -4cm, 6cm, 17cm
 
 # tool_orientation = [-np.pi/2,0,0] # [0,-2.22,2.22] # [2.22,2.22,0]
-tool_orientation = [0,0,0] # [0,-2.22,2.22] # [2.22,2.22,0]
+# tool_orientation = [0,0,0] # [0,-2.22,2.22] # [2.22,2.22,0]
 # ---------------------------------------------
 
 
@@ -52,34 +56,63 @@ print('Connecting to robot...')
 robot = Robot(False, None, None, workspace_limits,
               tcp_host_ip, tcp_port, rtc_host_ip, rtc_port,
               False, None, None)
-robot.open_gripper()
+# robot.open_gripper()
 
 # Slow down robot
 robot.joint_acc = 1.4
 robot.joint_vel = 1.05
 
 # Make robot gripper point upwards
-robot.move_joints([-np.pi, -np.pi/2, np.pi/2, 0, np.pi/2, np.pi])
+robot.move_joints([-np.pi, -np.pi/2, np.pi/2, 0, np.pi/2, 0])
 
+
+tool_orientation = robot.get_tcp_pose(print_euler=True)[3:6]
 # Move robot to each calibration point in workspace
 print('Collecting data...')
 
 fig = plt.figure()
 
+# check the workspace
+# max x, midpoint y, midpoint z
+if check_workspace:
+    robot.move_to(np.array([workspace_limits[0][1],
+                            (workspace_limits[1][1]+workspace_limits[1][0])/2,
+                            (workspace_limits[2][0] + workspace_limits[2][1])/2]), tool_orientation)
+    time.sleep(3)
+
+    # midpoint x, min y, midpoint z
+    robot.move_to(np.array([(workspace_limits[0][0]+workspace_limits[0][1])/2,
+                            workspace_limits[1][0],
+                            (workspace_limits[2][0] + workspace_limits[2][1])/2]), tool_orientation)
+    time.sleep(3)
+
+    # midpoint x, max y, midpoint z
+    robot.move_to(np.array([(workspace_limits[0][0]+workspace_limits[0][1])/2,
+                            workspace_limits[1][1],
+                            (workspace_limits[2][0] + workspace_limits[2][1])/2]), tool_orientation)
+    time.sleep(3)
+
 for calib_pt_idx in range(num_calib_grid_pts):
     tool_position = calib_grid_pts[calib_pt_idx,:]
+
+    # EFFECTIVELY, this is doing things in the [90 deg, 0, 90 deg] fixed world frame xyz rotation
     robot.move_to(tool_position, tool_orientation)
-    time.sleep(1)
+    time.sleep(.1)
 
     # Find charuco corner
-    color_img, depth_img = robot.camera.get_data()
+    # color_img, depth_img = robot.camera.get_data()
+    #
+    # tf = charuco_util.get_charuco_tf(color_img, 0, robot.camera.intrinsics, np.zeros(4))
+    #
+    # if tf is not None:
+    #     observed_pts.append(0)
+    #
+    # plt.subplot(211)
+    # plt.imshow(color_img)
+    # plt.subplot(212)
+    # plt.imshow(depth_img)
+    # plt.show()
 
-    tf = charuco_util.get_charuco_tf(color_img, 0, robot.camera.intrinsics, np.zeros(4))
-
-    import pdb
-    pdb.set_trace()
-    if tf is not None:
-        observed_pts.append()
 
     # Find checkerboard center
     # checkerboard_size = (3,3)
