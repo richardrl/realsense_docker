@@ -78,8 +78,15 @@ RUN pip3 install torch
 RUN pip3 install --user ur_rtde
 
 
-RUN apt install software-properties-common
+#RUN apt install software-properties-common
+#
+#RUN add-apt-repository ppa:deadsnakes/ppa
+#
+#RUN apt install python3.9
 
-RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get install -y gdb
 
-RUN apt install python3.9
+COPY ./entrypoint.sh /
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]

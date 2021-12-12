@@ -20,3 +20,4 @@ checkerboard_offset_from_tool =
 
 # Notes
 - Opencv does the axis as bgr instead of rgb
+- ptype to get type https://stackoverflow.com/questions/9568201/gdb-show-typeinfo-of-some-data

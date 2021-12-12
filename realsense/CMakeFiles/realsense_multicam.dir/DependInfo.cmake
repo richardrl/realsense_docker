@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/root/realsense_docker/realsense/realsense.cpp" "/root/realsense_docker/realsense/CMakeFiles/realsense.dir/realsense.cpp.o"
+  "/root/realsense_docker/realsense/realsense_multicam.cpp" "/root/realsense_docker/realsense/CMakeFiles/realsense_multicam.dir/realsense_multicam.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

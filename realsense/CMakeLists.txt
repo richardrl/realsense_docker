@@ -54,5 +54,9 @@ endif()
 set(PROJECT_LINK_LIBS librealsense2.so)
 add_executable(realsense realsense.cpp)
 target_link_libraries(realsense pthread ${DEPENDENCIES} ${PROJECT_LINK_LIBS})
-
 target_include_directories(realsense PRIVATE "/realsense")
+
+
+add_executable(realsense_multicam realsense_multicam.cpp)
+target_link_libraries(realsense_multicam pthread ${DEPENDENCIES} ${PROJECT_LINK_LIBS})
+target_include_directories(realsense_multicam PRIVATE "/realsense")

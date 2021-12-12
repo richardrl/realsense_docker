@@ -48,24 +48,13 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /root/vpg/realsense
+CMAKE_SOURCE_DIR = /root/realsense_docker/realsense
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /root/vpg/realsense
+CMAKE_BINARY_DIR = /root/realsense_docker/realsense
 
 #=============================================================================
 # Targets provided globally by CMake.
-
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -78,11 +67,22 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
+
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /root/vpg/realsense/CMakeFiles /root/vpg/realsense/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /root/realsense_docker/realsense/CMakeFiles /root/realsense_docker/realsense/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /root/vpg/realsense/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /root/realsense_docker/realsense/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -123,6 +123,19 @@ realsense/fast:
 	$(MAKE) -f CMakeFiles/realsense.dir/build.make CMakeFiles/realsense.dir/build
 .PHONY : realsense/fast
 
+#=============================================================================
+# Target rules for targets named realsense_multicam
+
+# Build rule for target.
+realsense_multicam: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 realsense_multicam
+.PHONY : realsense_multicam
+
+# fast build rule for target.
+realsense_multicam/fast:
+	$(MAKE) -f CMakeFiles/realsense_multicam.dir/build.make CMakeFiles/realsense_multicam.dir/build
+.PHONY : realsense_multicam/fast
+
 realsense.o: realsense.cpp.o
 
 .PHONY : realsense.o
@@ -150,18 +163,49 @@ realsense.cpp.s:
 	$(MAKE) -f CMakeFiles/realsense.dir/build.make CMakeFiles/realsense.dir/realsense.cpp.s
 .PHONY : realsense.cpp.s
 
+realsense_multicam.o: realsense_multicam.cpp.o
+
+.PHONY : realsense_multicam.o
+
+# target to build an object file
+realsense_multicam.cpp.o:
+	$(MAKE) -f CMakeFiles/realsense_multicam.dir/build.make CMakeFiles/realsense_multicam.dir/realsense_multicam.cpp.o
+.PHONY : realsense_multicam.cpp.o
+
+realsense_multicam.i: realsense_multicam.cpp.i
+
+.PHONY : realsense_multicam.i
+
+# target to preprocess a source file
+realsense_multicam.cpp.i:
+	$(MAKE) -f CMakeFiles/realsense_multicam.dir/build.make CMakeFiles/realsense_multicam.dir/realsense_multicam.cpp.i
+.PHONY : realsense_multicam.cpp.i
+
+realsense_multicam.s: realsense_multicam.cpp.s
+
+.PHONY : realsense_multicam.s
+
+# target to generate assembly for a file
+realsense_multicam.cpp.s:
+	$(MAKE) -f CMakeFiles/realsense_multicam.dir/build.make CMakeFiles/realsense_multicam.dir/realsense_multicam.cpp.s
+.PHONY : realsense_multicam.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... rebuild_cache"
-	@echo "... realsense"
 	@echo "... edit_cache"
+	@echo "... realsense"
+	@echo "... rebuild_cache"
+	@echo "... realsense_multicam"
 	@echo "... realsense.o"
 	@echo "... realsense.i"
 	@echo "... realsense.s"
+	@echo "... realsense_multicam.o"
+	@echo "... realsense_multicam.i"
+	@echo "... realsense_multicam.s"
 .PHONY : help
 
 

@@ -4,7 +4,7 @@ import time
 import matplotlib.pyplot as plt
 
 import charuco_util
-from camera import Camera
+from real.camera import Camera
 
 import numpy as np
 

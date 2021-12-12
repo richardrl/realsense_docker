@@ -1,3 +1,4 @@
-/root/vpg/realsense/CMakeFiles/rebuild_cache.dir
-/root/vpg/realsense/CMakeFiles/realsense.dir
-/root/vpg/realsense/CMakeFiles/edit_cache.dir
+/root/realsense_docker/realsense/CMakeFiles/edit_cache.dir
+/root/realsense_docker/realsense/CMakeFiles/realsense.dir
+/root/realsense_docker/realsense/CMakeFiles/rebuild_cache.dir
+/root/realsense_docker/realsense/CMakeFiles/realsense_multicam.dir

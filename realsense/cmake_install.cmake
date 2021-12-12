@@ -1,4 +1,4 @@
-# Install script for directory: /root/vpg/realsense
+# Install script for directory: /root/realsense_docker/realsense
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/root/vpg/realsense/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/root/realsense_docker/realsense/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

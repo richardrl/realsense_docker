@@ -21,12 +21,16 @@ rtc_port = 30003
 
 # workspace_limits = np.asarray([[0.3, 0.748], [0.05, 0.4], [-0.2, -0.1]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
 
-workspace_limits = np.asarray([[0.4, 0.648], [-.25, 0.3], [-.08, .13]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
+# workspace_limits = np.asarray([[0.4, 0.648], [-.25, 0.3], [-.08, .13]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
+workspace_limits = np.asarray([[0.4, 0.648], [0, 0.3], [-.08, .13]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
+
+
 calib_grid_step = 0.05 * 1
 # checkerboard_offset_from_tool = [0,-0.13,0.02]
 
 # position of the tool in the checkerboard frame
-checkerboard_offset_from_tool = [0,-0.13,0.02]
+# checkerboard_offset_from_tool = [0,-0.13,0.02]
+checkerboard_offset_from_tool = [-.04,0.06,0.17]
 
 # from tool0:
 # -4cm, 6cm, 17cm
@@ -55,7 +59,7 @@ observed_pix = []
 print('Connecting to robot...')
 robot = Robot(False, None, None, workspace_limits,
               tcp_host_ip, tcp_port, rtc_host_ip, rtc_port,
-              False, None, None)
+              False, None, None, load_camera=True)
 # robot.open_gripper()
 
 # Slow down robot
@@ -73,6 +77,7 @@ print('Collecting data...')
 fig = plt.figure()
 
 # check the workspace
+check_workspace = False
 # max x, midpoint y, midpoint z
 if check_workspace:
     robot.move_to(np.array([workspace_limits[0][1],
@@ -97,16 +102,27 @@ for calib_pt_idx in range(num_calib_grid_pts):
 
     # EFFECTIVELY, this is doing things in the [90 deg, 0, 90 deg] fixed world frame xyz rotation
     robot.move_to(tool_position, tool_orientation)
-    time.sleep(.1)
+    time.sleep(1)
 
     # Find charuco corner
-    # color_img, depth_img = robot.camera.get_data()
-    #
-    # tf = charuco_util.get_charuco_tf(color_img, 0, robot.camera.intrinsics, np.zeros(4))
-    #
-    # if tf is not None:
-    #     observed_pts.append(0)
-    #
+    color_img, depth_img = robot.camera.get_data()
+
+    tf = charuco_util.get_charuco_tf(color_img, 0, robot.camera.intrinsics, np.zeros(4))
+
+    plt.subplot(211)
+    plt.imshow(color_img)
+    plt.subplot(212)
+    plt.imshow(depth_img)
+    plt.show()
+
+    if tf is not None:
+        print(f"Found tf at {tool_position}")
+        observed_pts.append(0)
+        tool_position = tool_position + checkerboard_offset_from_tool
+
+        measured_pts.append(tool_position)
+        observed_pix.append(color_img)
+
     # plt.subplot(211)
     # plt.imshow(color_img)
     # plt.subplot(212)

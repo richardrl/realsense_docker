@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11 -g  -L/usr/lib/x86_64-linux-gnu/ -rdynamic CMakeFiles/realsense_multicam.dir/realsense_multicam.cpp.o  -o realsense_multicam -lpthread -lrealsense2 -lGL -lGLU -lm -lglfw -lrealsense2 

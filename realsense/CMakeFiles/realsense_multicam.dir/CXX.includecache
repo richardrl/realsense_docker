@@ -18,7 +18,7 @@ iostream
 stb_easy_font.h
 /root/realsense_docker/realsense/stb_easy_font.h
 
-/root/realsense_docker/realsense/realsense.cpp
+/root/realsense_docker/realsense/realsense_multicam.cpp
 librealsense2/rs.hpp
 -
 librealsense2/rs_advanced_mode.hpp

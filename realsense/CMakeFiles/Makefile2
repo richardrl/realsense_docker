@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /root/vpg/realsense
+CMAKE_SOURCE_DIR = /root/realsense_docker/realsense
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /root/vpg/realsense
+CMAKE_BINARY_DIR = /root/realsense_docker/realsense
 
 #=============================================================================
 # Target rules for target CMakeFiles/realsense.dir
@@ -66,7 +66,7 @@ CMAKE_BINARY_DIR = /root/vpg/realsense
 CMakeFiles/realsense.dir/all:
 	$(MAKE) -f CMakeFiles/realsense.dir/build.make CMakeFiles/realsense.dir/depend
 	$(MAKE) -f CMakeFiles/realsense.dir/build.make CMakeFiles/realsense.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/root/vpg/realsense/CMakeFiles --progress-num=1,2 "Built target realsense"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/root/realsense_docker/realsense/CMakeFiles --progress-num=1,2 "Built target realsense"
 .PHONY : CMakeFiles/realsense.dir/all
 
 # Include target in all.
@@ -76,9 +76,9 @@ all: CMakeFiles/realsense.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/realsense.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /root/vpg/realsense/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /root/realsense_docker/realsense/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/realsense.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /root/vpg/realsense/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /root/realsense_docker/realsense/CMakeFiles 0
 .PHONY : CMakeFiles/realsense.dir/rule
 
 # Convenience name for target.
@@ -93,6 +93,43 @@ CMakeFiles/realsense.dir/clean:
 
 # clean rule for target.
 clean: CMakeFiles/realsense.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/realsense_multicam.dir
+
+# All Build rule for target.
+CMakeFiles/realsense_multicam.dir/all:
+	$(MAKE) -f CMakeFiles/realsense_multicam.dir/build.make CMakeFiles/realsense_multicam.dir/depend
+	$(MAKE) -f CMakeFiles/realsense_multicam.dir/build.make CMakeFiles/realsense_multicam.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/root/realsense_docker/realsense/CMakeFiles --progress-num=3,4 "Built target realsense_multicam"
+.PHONY : CMakeFiles/realsense_multicam.dir/all
+
+# Include target in all.
+all: CMakeFiles/realsense_multicam.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/realsense_multicam.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /root/realsense_docker/realsense/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/realsense_multicam.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /root/realsense_docker/realsense/CMakeFiles 0
+.PHONY : CMakeFiles/realsense_multicam.dir/rule
+
+# Convenience name for target.
+realsense_multicam: CMakeFiles/realsense_multicam.dir/rule
+
+.PHONY : realsense_multicam
+
+# clean rule for target.
+CMakeFiles/realsense_multicam.dir/clean:
+	$(MAKE) -f CMakeFiles/realsense_multicam.dir/build.make CMakeFiles/realsense_multicam.dir/clean
+.PHONY : CMakeFiles/realsense_multicam.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/realsense_multicam.dir/clean
 
 .PHONY : clean
 
