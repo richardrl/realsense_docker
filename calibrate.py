@@ -74,7 +74,7 @@ tool_orientation = robot.get_tcp_pose(print_euler=True)[3:6]
 # Move robot to each calibration point in workspace
 print('Collecting data...')
 
-fig = plt.figure()
+# fig = plt.figure()
 
 # check the workspace
 check_workspace = False
@@ -109,11 +109,11 @@ for calib_pt_idx in range(num_calib_grid_pts):
 
     tf = charuco_util.get_charuco_tf(color_img, 0, robot.camera.intrinsics, np.zeros(4))
 
-    plt.subplot(211)
-    plt.imshow(color_img)
-    plt.subplot(212)
-    plt.imshow(depth_img)
-    plt.show()
+    # plt.subplot(211)
+    # plt.imshow(color_img)
+    # plt.subplot(212)
+    # plt.imshow(depth_img)
+    # plt.show()
 
     if tf is not None:
         print(f"Found tf at {tool_position}")

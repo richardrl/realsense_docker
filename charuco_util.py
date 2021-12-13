@@ -3,7 +3,7 @@ import numpy as np
 from cv2 import aruco
 
 
-def make_board(board_num, num_rows=4, num_cols=4, marker_size=0.018, square_size=0.024):
+def make_board(board_num, num_rows=4, num_cols=4, square_size=0.024, marker_size=0.018):
     num_markers = int(np.ceil(num_rows * num_cols / 2))
     dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_1000)
     dictionary.bytesList = dictionary.bytesList[board_num*num_markers:board_num*num_markers+num_markers,...]

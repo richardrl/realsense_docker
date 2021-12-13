@@ -18,9 +18,11 @@ class Robot(object):
         self.workspace_limits = workspace_limits
 
         if load_camera:
+            print("Attempting to load camera")
             from real.camera import Camera
-            self.camera = Camera()
+            self.camera = Camera(port=50000)
             self.cam_intrinsics = self.camera.intrinsics
+            print("Camera loaded")
 
         # Load camera pose (from running calibrate.py), intrinsics and depth scale
         # self.cam_pose = np.loadtxt('real/camera_pose.txt', delimiter=' ')

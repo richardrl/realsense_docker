@@ -10,25 +10,27 @@ import struct
 
 class Camera(object):
 
-    def __init__(self):
+    def __init__(self, port=50000):
 
         # Data options (change me)
         self.im_height = 720
         self.im_width = 1280
         self.tcp_host_ip = '127.0.0.1'
-        self.tcp_port = 50000
+        self.tcp_port = port
         self.buffer_size = 4098 # 4 KiB
 
         # Connect to server
+        print(f"Connecting to tcp server at port {port}")
         self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.tcp_socket.connect((self.tcp_host_ip, self.tcp_port))
 
+        print(f"Done")
         self.intrinsics = None
+
         self.get_data()
 
 
     def get_data(self):
-
         # Ping the server with anything
         self.tcp_socket.send(b'asdf')
 
@@ -39,7 +41,9 @@ class Camera(object):
         #     color image, self.im_width x self.im_height x 3 uint8, number of bytes: self.im_width x self.im_height x 3
         data = b''
         while len(data) < (10*4 + self.im_height*self.im_width*5):
+            print("Waiting for data...")
             data += self.tcp_socket.recv(self.buffer_size)
+            print("Received data...")
 
         # Reorganize TCP data into color and depth frame
         self.intrinsics = np.fromstring(data[0:(9*4)], np.float32).reshape(3, 3)

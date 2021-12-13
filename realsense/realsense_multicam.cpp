@@ -67,7 +67,7 @@ cv::Mat detectCharucoBoardWithCalibrationPose(cv::Mat image, cv::Mat cameraMatri
             bool valid = cv::aruco::estimatePoseCharucoBoard(charucoCorners, charucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
             // if charuco pose is valid
             if (valid)
-                cv::aruco::drawAxis(imageCopy, cameraMatrix, distCoeffs, rvec, tvec, 0.1f);
+                cv::aruco::drawAxis(imageCopy, cameraMatrix, distCoeffs, rvec, tvec, 0.018f);
         }
     }
 //    cv::imshow("out", imageCopy);
@@ -105,6 +105,8 @@ class Server {
 };
 
 Server::Server(int port) {
+    std::cout << "Starting server on port..." << std::endl << port << std::endl<< std::endl;
+
     init_sock = socket(PF_INET, SOCK_STREAM, 0);
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons (port);
@@ -131,12 +133,21 @@ void * Server::listener_thread() {
         conn_sock = accept (init_sock, (struct sockaddr *) &serv_storage, &addr_size);
         printf ("Connected to client.\n");
 
+//        printf("receive_buffer");
+//        printf(&receive_buffer);
+
         while(true) {
 
             // Parse ping from client
+            printf("139\n");
+
             memset(receive_buffer, 0, sizeof(receive_buffer));
+            printf("141\n");
+
             int resp_msg_size = recv(conn_sock, receive_buffer, 64, 0);
             if (resp_msg_size <= 0) break;
+
+            printf("146\n");
 
             // Send buffer data
             pthread_mutex_lock(&buffer_access_mutex);
@@ -144,7 +155,10 @@ void * Server::listener_thread() {
             if (msg_size == 0 ) printf("Warning: No data was sent to client.\n");
             int tmp = errno;
             if (msg_size < 0) printf ("Errno %d\n", tmp);
+
+            printf("Before unlock\n");
             pthread_mutex_unlock(&buffer_access_mutex);
+            printf("After unlock\n");
         }
     }
 }
@@ -230,6 +244,10 @@ cv::Mat display_transform(rs2::video_frame color_frame, cv::Mat cameraIntrinsics
 
 // Capture color and depth video streams, render them to the screen, send them through TCP
 int main(int argc, char * argv[]) try {
+//    Server realsense_server(50000);
+//    realsense_server.init_listener_thread();
+
+
     // Create a simple OpenGL window for rendering:
     window app(2560, 720, "RealSense Stream");
 
@@ -244,10 +262,13 @@ int main(int argc, char * argv[]) try {
     std::vector<Server> realsense_server_arr;
 //    std::vector<window> window_arr;
 
-    for (int i=0; i<devices.size(); ++i) {
+//    for (int i=0; i<devices.size(); ++i) {
+    for (int i=0; i<1; ++i) {
+        printf("Initializing server... %d\n", i);
         Server realsense_server(50000 + i);
-        realsense_server.init_listener_thread();
+//        realsense_server.init_listener_thread();
         realsense_server_arr.emplace_back(realsense_server);
+        realsense_server_arr.back().init_listener_thread();
         }
 //
 //        window app(2560, 720, "RealSense Stream");
@@ -337,25 +358,32 @@ int main(int argc, char * argv[]) try {
             // Find and colorize the depth data
             rs2::frame depth_colorized = aligned_depth.apply_filter(color_map);
 
-            std::cout << "Updating device " << device_idx << std::endl;
+//            std::cout << "Updating device " << device_idx << std::endl;
 
+
+//            int depth_size = aligned_depth.get_width()*aligned_depth.get_height()*aligned_depth.get_bytes_per_pixel();
+//            realsense_server_arr[device_idx].update_buffer((unsigned char*)aligned_depth.get_data(), 10*4, depth_size);
+//
+//            int color_size = data.get_color_frame().get_width()*data.get_color_frame().get_height()*data.get_color_frame().get_bytes_per_pixel();
+//            realsense_server_arr[device_idx].update_buffer((unsigned char*)color.get_data(), 10*4 + depth_size, color_size);
+//
+//            // Send camera intrinsics and depth scale
+//            realsense_server_arr[device_idx].update_buffer((unsigned char*)color_intrinsics_arr, 0, 9*4);
+//            realsense_server_arr[device_idx].update_buffer((unsigned char*)&depth_scale, 9*4, 4);
 
             int depth_size = aligned_depth.get_width()*aligned_depth.get_height()*aligned_depth.get_bytes_per_pixel();
-            realsense_server_arr[device_idx].update_buffer((unsigned char*)aligned_depth.get_data(), 10*4, depth_size);
-
+            realsense_server_arr[0].update_buffer((unsigned char*)aligned_depth.get_data(), 10*4, depth_size);
             int color_size = data.get_color_frame().get_width()*data.get_color_frame().get_height()*data.get_color_frame().get_bytes_per_pixel();
-            realsense_server_arr[device_idx].update_buffer((unsigned char*)color.get_data(), 10*4 + depth_size, color_size);
+            realsense_server_arr[0].update_buffer((unsigned char*)color.get_data(), 10*4 + depth_size, color_size);
 
             // Send camera intrinsics and depth scale
-            realsense_server_arr[device_idx].update_buffer((unsigned char*)color_intrinsics_arr, 0, 9*4);
-            realsense_server_arr[device_idx].update_buffer((unsigned char*)&depth_scale, 9*4, 4);
-
+            realsense_server_arr[0].update_buffer((unsigned char*)color_intrinsics_arr, 0, 9*4);
+            realsense_server_arr[0].update_buffer((unsigned char*)&depth_scale, 9*4, 4);
             // Render depth on to the first half of the screen and color on to the second
 //            depth_image.render(depth_colorized, { 0, 0, app.width() / 2, app.height() });
 //            color_image.render(color, { app.width() / 2, 0, app.width() / 2, app.height() });
 
             cv::Mat color_intrinsics_mat = cv::Mat(3, 3, CV_32F, color_intrinsics_arr);
-//            display_transform(color, color_intrinsics_mat);
 
             // start the processing_block code
             rs2::frame_queue q;
@@ -375,7 +403,9 @@ int main(int argc, char * argv[]) try {
                 auto res = src.allocate_video_frame(f.get_profile(), f);
 
                 // copy from cv --> frame
-                memcpy((void*)res.get_data(), color_out_mat.data, w * h * 2);
+//                std::cout << "matrix dims = " << color_out_mat.elemSize() << std::endl;
+
+                memcpy((void*)res.get_data(), color_out_mat.data, w * h * 3);
 
                 // Send the resulting frame to the output queue
                 src.frame_ready(res);
@@ -387,8 +417,8 @@ int main(int argc, char * argv[]) try {
 
             color = q.wait_for_frame();
 
-            depth_image.render(depth_colorized, {device_idx*app.width() / devices.size(), 0, app.width() / devices.size(), app.height() / 2});
-            color_image.render(color, {device_idx*app.width() / devices.size(), app.height() / 2, app.width() / devices.size(), app.height() / 2});
+//            depth_image.render(depth_colorized, {device_idx*app.width() / devices.size(), 0, app.width() / devices.size(), app.height() / 2});
+            color_image.render(color, {device_idx*app.width() / devices.size(), 0, app.width() / devices.size(), app.height() / 2});
             }
        }
     return EXIT_SUCCESS;
