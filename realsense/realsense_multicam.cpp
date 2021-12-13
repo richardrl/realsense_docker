@@ -1,5 +1,7 @@
 // License: Apache 2.0. See LICENSE file in root directory.
 // Copyright(c) 2017 Intel Corporation. All Rights Reserved.
+// source: https://github.com/IntelRealSense/librealsense/blob/master/wrappers/opencv/depth-filter/rs-depth-filter.cpp
+// https://github.com/IntelRealSense/librealsense/issues/2634
 
 #include <librealsense2/rs.hpp> // Include RealSense Cross Platform API
 #include <librealsense2/rs_advanced_mode.hpp>
@@ -37,6 +39,44 @@ int num_rows=4, int num_cols=4, float marker_size=0.018, float square_size=0.024
 }
 
 
+cv::Mat detectCharucoBoardWithCalibrationPose(cv::Mat image, cv::Mat cameraMatrix, cv::Mat distCoeffs)
+{
+    cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_1000);
+
+    cv::Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(4, 4, 0.024f, 0.018f, dictionary);
+    cv::Ptr<cv::aruco::DetectorParameters> params = cv::aruco::DetectorParameters::create();
+
+    cv::Mat imageCopy;
+    image.copyTo(imageCopy);
+
+    std::vector<int> markerIds;
+    std::vector<std::vector<cv::Point2f> > markerCorners;
+    cv::aruco::detectMarkers(image, board->dictionary, markerCorners, markerIds, params);
+    // if at least one marker detected
+    if (markerIds.size() > 0) {
+        cv::aruco::drawDetectedMarkers(imageCopy, markerCorners, markerIds);
+        std::vector<cv::Point2f> charucoCorners;
+        std::vector<int> charucoIds;
+        cv::aruco::interpolateCornersCharuco(markerCorners, markerIds, image, board, charucoCorners, charucoIds, cameraMatrix, distCoeffs);
+        // if at least one charuco corner detected
+        if (charucoIds.size() > 0) {
+            cv::Scalar color = cv::Scalar(255, 0, 0);
+            cv::aruco::drawDetectedCornersCharuco(imageCopy, charucoCorners, charucoIds, color);
+            cv::Vec3d rvec, tvec;
+            // cv::aruco::estimatePoseCharucoBoard(charucoCorners, charucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
+            bool valid = cv::aruco::estimatePoseCharucoBoard(charucoCorners, charucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
+            // if charuco pose is valid
+            if (valid)
+                cv::aruco::drawAxis(imageCopy, cameraMatrix, distCoeffs, rvec, tvec, 0.1f);
+        }
+    }
+//    cv::imshow("out", imageCopy);
+//    char key = (char)cv::waitKey(30);
+//    if (key == 27)
+//        break;
+
+    return imageCopy;
+}
 
 //------------------- TCP Server Code -------------------
 //-------------------------------------------------------
@@ -137,16 +177,56 @@ const int depth_disparity_shift = 50;
 // Convert from video frame to opencv mat,
 // Get transform, display axises
 // Then convert back
-void display_transform(rs2::video_frame color_frame) {
+cv::Mat display_transform(rs2::video_frame color_frame, cv::Mat cameraIntrinsics, rs2::frame_source& src) {
     // convert to color frame
     cv::Mat matColor(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3, (void*)color_frame.get_data(), cv::Mat::AUTO_STEP);
+
+    cv::Mat distCoeffs = cv::Mat::zeros(cv::Size(1, 4), CV_64FC1);
 
     // get transform
     // apply axis visualization
 
+//    std::cout << "matColor = " << std::endl << " "  << matColor << std::endl<< std::endl;
+    cv::Mat matColorOut = detectCharucoBoardWithCalibrationPose(matColor, cameraIntrinsics, distCoeffs);
+    return matColorOut;
+//    rs2::frame_source& src;
+//    int newW = color_frame.get_width();
+//    int newH = color_frame.get_height();
+//    auto out_frame = src.allocate_video_frame(color_frame.get_profile(), color_frame, 0,
+//            newW, newH, color_frame.get_bytes_per_pixel() * newH,
+//            RS2_EXTENSION_VIDEO_FRAME);
+//
+//    memcpy((void*)out_frame.get_data(), matColorOut.data, newW * newH * 2);
+//    std::cout << "matColorOut = " << std::endl << " "  << matColorOut << std::endl << std::endl;
 
-    // convert back to
+//    cv::Mat diff = matColor != matColorOut;
+//
+//    bool eq = cv::countNonZero(diff) == 0;
+//
+//    std::cout << eq << std::endl;
+    // convert back to video_frame
+
 }
+
+
+//class charuco_display_filter : public rs2::filter
+//{
+//    public:
+//        charuco_display_filter(cv::Mat intrinsicsMat);
+////            : filter([this](rs2::frame f, rs2::frame_source& src) {
+////            : filter([this](rs2::frame f, rs2::frame_source& src) {
+////                scoped_timer t("charuco_display_filter");
+////                display_transform(f, intrinsicsMat, src);
+////            })
+////        {}
+//
+//    private:
+//        cv::Mat intrinsicsMat;
+//};
+
+//charuco_display_filter::charuco_display_filter(cv::Mat intrinsicsMat) {
+//    intrinsicsMat = intrinsicsMat;
+//}
 
 // Capture color and depth video streams, render them to the screen, send them through TCP
 int main(int argc, char * argv[]) try {
@@ -274,7 +354,38 @@ int main(int argc, char * argv[]) try {
 //            depth_image.render(depth_colorized, { 0, 0, app.width() / 2, app.height() });
 //            color_image.render(color, { app.width() / 2, 0, app.width() / 2, app.height() });
 
-//            display_transform(color);
+            cv::Mat color_intrinsics_mat = cv::Mat(3, 3, CV_32F, color_intrinsics_arr);
+//            display_transform(color, color_intrinsics_mat);
+
+            // start the processing_block code
+            rs2::frame_queue q;
+            rs2::processing_block pb(
+                [color_intrinsics_mat](rs2::frame f, rs2::frame_source& src)
+            {
+                // For each input frame f, do:
+
+                const int w = f.as<rs2::video_frame>().get_width();
+                const int h = f.as<rs2::video_frame>().get_height();
+
+                cv::Mat color_out_mat = display_transform(f, color_intrinsics_mat, src);
+
+                // Allocate new frame. Copy all missing data from f.
+                // This assumes the output is same resolution and format
+                // if not true, need to specify parameters explicitly
+                auto res = src.allocate_video_frame(f.get_profile(), f);
+
+                // copy from cv --> frame
+                memcpy((void*)res.get_data(), color_out_mat.data, w * h * 2);
+
+                // Send the resulting frame to the output queue
+                src.frame_ready(res);
+            });
+            pb.start(q); // Bind output of the processing block to be enqueued into the queue
+
+
+            pb.invoke(color);
+
+            color = q.wait_for_frame();
 
             depth_image.render(depth_colorized, {device_idx*app.width() / devices.size(), 0, app.width() / devices.size(), app.height() / 2});
             color_image.render(color, {device_idx*app.width() / devices.size(), app.height() / 2, app.width() / devices.size(), app.height() / 2});
