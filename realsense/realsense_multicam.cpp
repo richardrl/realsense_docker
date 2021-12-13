@@ -14,6 +14,28 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <iostream>
+#include <math.h>       /* ceil */
+
+// opencv stuff
+#include <opencv2/core.hpp>
+#include <opencv2/aruco/charuco.hpp>
+//#include <opencv2/highgui.hpp>
+#include <tuple>
+
+
+std::tuple<cv::aruco::CharucoBoard*, cv::aruco::Dictionary> make_board(int board_num,
+int num_rows=4, int num_cols=4, float marker_size=0.018, float square_size=0.024)
+{
+    int num_markers = ceil(num_rows * num_cols / 2);
+    cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_1000);
+//    dictionary.bytesList = dictionary.bytesList[board_num*num_markers:board_num*num_markers+num_markers,...];
+    dictionary.bytesList = dictionary.bytesList.rowRange(board_num*num_markers, board_num*num_markers+num_markers);
+
+    cv::aruco::CharucoBoard* board = cv::aruco::CharucoBoard::create(num_cols,num_rows,square_size,marker_size, &dictionary);
+
+    return std::make_tuple(board, dictionary);
+}
+
 
 
 //------------------- TCP Server Code -------------------
@@ -112,6 +134,20 @@ const int stream_height = 720;
 const int stream_fps = 30;
 const int depth_disparity_shift = 50;
 
+// Convert from video frame to opencv mat,
+// Get transform, display axises
+// Then convert back
+void display_transform(rs2::video_frame color_frame) {
+    // convert to color frame
+    cv::Mat matColor(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3, (void*)color_frame.get_data(), cv::Mat::AUTO_STEP);
+
+    // get transform
+    // apply axis visualization
+
+
+    // convert back to
+}
+
 // Capture color and depth video streams, render them to the screen, send them through TCP
 int main(int argc, char * argv[]) try {
     // Create a simple OpenGL window for rendering:
@@ -145,7 +181,7 @@ int main(int argc, char * argv[]) try {
     rs2::colorizer color_map;
 
 
-    // Store array of multiple pipelines
+    // Initialize & store array of multiple pipelines
     std::vector<rs2::pipeline>  pipelines;
     for (auto&& dev : ctx.query_devices())
     {
@@ -237,6 +273,9 @@ int main(int argc, char * argv[]) try {
             // Render depth on to the first half of the screen and color on to the second
 //            depth_image.render(depth_colorized, { 0, 0, app.width() / 2, app.height() });
 //            color_image.render(color, { app.width() / 2, 0, app.width() / 2, app.height() });
+
+//            display_transform(color);
+
             depth_image.render(depth_colorized, {device_idx*app.width() / devices.size(), 0, app.width() / devices.size(), app.height() / 2});
             color_image.render(color, {device_idx*app.width() / devices.size(), app.height() / 2, app.width() / devices.size(), app.height() / 2});
             }

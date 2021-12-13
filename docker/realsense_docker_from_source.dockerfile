@@ -1,3 +1,5 @@
+# this is the best script because building from source
+# lets you build realsense_multicam.cpp
 #FROM python:3.6-slim
 
 FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
@@ -86,6 +88,24 @@ RUN pip3 install --user ur_rtde
 
 RUN apt-get install -y gdb
 
+
+# install opencv and contrib packages
+# https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html
+WORKDIR /root/opencv
+RUN apt update && apt install -y cmake g++ wget unzip
+RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/master.zip
+RUN wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/master.zip
+RUN unzip opencv.zip
+RUN unzip opencv_contrib.zip
+RUN mkdir -p build
+
+WORKDIR build
+
+RUN cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-master/modules ../opencv-master -DCUDA_ARCH_BIN=10.0
+RUN cmake --build .
+
+# this is needed for the headers...
+RUN apt-get install libopencv-core-dev
 COPY ./entrypoint.sh /
 
 ENTRYPOINT ["/entrypoint.sh"]

@@ -8,6 +8,8 @@ set -e
 
 export PYTHONPATH=/root/realsense_docker/:${PYTHONPATH}
 
+export OpenCV_DIR=/root/build
+
 #eval "/usr/sbin/sshd"
 
 eval "bash"
