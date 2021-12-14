@@ -59,7 +59,7 @@ calib_grid_pts = np.concatenate((calib_grid_x, calib_grid_y, calib_grid_z), axis
 
 p_WorldCharucocorner_Measured_dic = dict()
 p_CameraCharucocorner_Estimated_dic = dict()
-observed_pix_dic = dict()
+# observed_pix_dic = dict()
 
 # Move robot to home pose
 print('Connecting to robot...')
@@ -127,7 +127,7 @@ for calib_pt_idx in range(num_calib_grid_pts):
 
         if serial_no not in p_CameraCharucocorner_Estimated_dic.keys():
             assert serial_no not in p_WorldCharucocorner_Measured_dic.keys()
-            assert serial_no not in observed_pix_dic.keys()
+            # assert serial_no not in observed_pix_dic.keys()
 
             p_CameraCharucocorner_Estimated_dic[serial_no] = []
             p_WorldCharucocorner_Measured_dic[serial_no] = []
@@ -138,10 +138,12 @@ for calib_pt_idx in range(num_calib_grid_pts):
 
             # check if the shapes are right
             # confirm this by drawing XY simple point and rotating
+            # think about placing the translation in the world frame first. How do we get it to now align with the full
+            # position in the world frame? We rotate it
             p_WorldCharucocorner_Measured_sample = R_WorldTCPFrame @ (t_WorldTCPFrame + checkerboard_offset_from_tool)
 
             # tf trans represents the charuco tag corner point in camera coordinates
-            p_CameraCharucocorner_Estimated_dic[serial_no].append(tf[:3, 3])
+            p_CameraCharucocorner_Estimated_dic[serial_no].append(tf[:3, :3] @ tf[:3, 3])
 
             p_WorldCharucocorner_Measured_dic[serial_no].append(p_WorldCharucocorner_Measured_sample)
             # observed_pix_dic[serial_no].append(color_img)
@@ -152,7 +154,7 @@ robot.go_home()
 for k in p_CameraCharucocorner_Estimated_dic.keys():
     p_CameraCharucocorner_Estimated_dic[k] = np.asarray(p_CameraCharucocorner_Estimated_dic[k])
     p_WorldCharucocorner_Measured_dic[k] = np.asarray(p_WorldCharucocorner_Measured_dic[k])
-    observed_pix_dic[k] = np.asarray(observed_pix_dic[k])
+    # observed_pix_dic[k] = np.asarray(observed_pix_dic[k])
 
 
 # Estimate rigid transform with SVD (from Nghia Ho)
@@ -234,6 +236,7 @@ def get_rigid_transform_error(z_scale):
     error = np.sum(np.multiply(error,error))
     rmse = np.sqrt(error / p_WorldCharucocorner_Measured.shape[0])
     return rmse
+
 
 # optimize for each camera
 for serial_no in p_CameraCharucocorner_Estimated_dic.keys():
