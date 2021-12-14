@@ -75,7 +75,7 @@ class Robot(object):
     def get_cameras_datas(self):
         for i in range(len(self.cameras)):
             color_img, depth_img = self.cameras[i].get_data()
-            yield color_img, depth_img
+            yield self.cameras[i].serial_number, color_img, depth_img
 
     def get_tcp_pose(self, print_euler=False):
         """
