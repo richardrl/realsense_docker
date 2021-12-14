@@ -220,8 +220,6 @@ def get_rigid_transform_error(z_scale):
     # Estimate rigid transform between measured points and new observed points
     # R, t = get_rigid_transform(np.asarray(measured_pts), np.asarray(new_observed_pts))
 
-    import pdb
-    pdb.set_trace()
     R_CameraWorld_Estimated, t_CameraWorld_Estimated = get_rigid_transform(np.asarray(p_WorldCharucocorner_Measured),
                                                        np.asarray(p_CameraCharucocorner_Estimated))
 
@@ -257,8 +255,8 @@ for serial_no in p_CameraCharucocorner_Estimated_dic.keys():
 
     # Save camera optimized offset and camera pose
     print('Saving...')
-    np.savetxt(f"real/{serial_no}_camera_depth_scale.txt", camera_depth_offset, delimiter=' ')
+    np.savetxt(f"out/{serial_no}_camera_depth_scale.txt", camera_depth_offset, delimiter=' ')
     get_rigid_transform_error(camera_depth_offset)
     camera_pose = np.linalg.inv(X_CameraWorld)
-    np.savetxt(f"real/{serial_no}_camera_pose.txt", camera_pose, delimiter=' ')
+    np.savetxt(f"out/{serial_no}_camera_pose.txt", camera_pose, delimiter=' ')
     print('Done.')
