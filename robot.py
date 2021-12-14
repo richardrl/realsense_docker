@@ -85,7 +85,7 @@ class Robot(object):
     def get_tcp_pose(self, print_euler=False):
         """
 
-        Returns: (x,y,z,rx,ry,rz)
+        Returns: (x,y,z,rx,ry,rz) where rx ry rz are rotation vector representation
 
         """
         tcp_pose = rtde_r.getActualTCPPose()

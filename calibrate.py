@@ -10,6 +10,7 @@ from scipy import optimize
 from mpl_toolkits.mplot3d import Axes3D
 import os
 import charuco_util
+from scipy.spatial.transform import Rotation as R
 
 
 # User options (change me)
@@ -23,7 +24,7 @@ rtc_port = 30003
 # workspace_limits = np.asarray([[0.4, 0.648], [-.2, 0.3], [-.08, .05]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
 
 # do small amount of grid points to test the optimization code
-workspace_limits = np.asarray([[0.4, 0.648], [0, 0.1], [-.08, .05]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
+workspace_limits = np.asarray([[0.4, 0.5], [0, 0.1], [-.08, 0]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
 
 calib_grid_step = 0.05 * 1
 # checkerboard_offset_from_tool = [0,-0.13,0.02]
@@ -76,7 +77,7 @@ robot.joint_vel = 1.05
 robot.move_joints([-np.pi, -np.pi/2, np.pi/2, 0, np.pi/2, 0])
 
 
-R_WorldTCPFrame = robot.get_tcp_pose(print_euler=True)[3:6]
+R_WorldTCPFrame_asrotvec = robot.get_tcp_pose(print_euler=True)[3:6]
 # Move robot to each calibration point in workspace
 print('Collecting data...')
 
@@ -88,26 +89,26 @@ check_workspace = False
 if check_workspace:
     robot.move_to(np.array([workspace_limits[0][1],
                             (workspace_limits[1][1]+workspace_limits[1][0])/2,
-                            (workspace_limits[2][0] + workspace_limits[2][1])/2]), R_WorldTCPFrame)
+                            (workspace_limits[2][0] + workspace_limits[2][1])/2]), R_WorldTCPFrame_asrotvec)
     time.sleep(3)
 
     # midpoint x, min y, midpoint z
     robot.move_to(np.array([(workspace_limits[0][0]+workspace_limits[0][1])/2,
                             workspace_limits[1][0],
-                            (workspace_limits[2][0] + workspace_limits[2][1])/2]), R_WorldTCPFrame)
+                            (workspace_limits[2][0] + workspace_limits[2][1])/2]), R_WorldTCPFrame_asrotvec)
     time.sleep(3)
 
     # midpoint x, max y, midpoint z
     robot.move_to(np.array([(workspace_limits[0][0]+workspace_limits[0][1])/2,
                             workspace_limits[1][1],
-                            (workspace_limits[2][0] + workspace_limits[2][1])/2]), R_WorldTCPFrame)
+                            (workspace_limits[2][0] + workspace_limits[2][1])/2]), R_WorldTCPFrame_asrotvec)
     time.sleep(3)
 
 for calib_pt_idx in range(num_calib_grid_pts):
     t_WorldTCPFrame = calib_grid_pts[calib_pt_idx, :]
 
     # EFFECTIVELY, this is doing things in the [90 deg, 0, 90 deg] fixed world frame xyz rotation
-    robot.move_to(t_WorldTCPFrame, R_WorldTCPFrame)
+    robot.move_to(t_WorldTCPFrame, R_WorldTCPFrame_asrotvec)
     time.sleep(.3)
     cam_data = robot.get_cameras_datas()
 
@@ -140,7 +141,7 @@ for calib_pt_idx in range(num_calib_grid_pts):
             # confirm this by drawing XY simple point and rotating
             # think about placing the translation in the world frame first. How do we get it to now align with the full
             # position in the world frame? We rotate it
-            p_WorldCharucocorner_Measured_sample = R_WorldTCPFrame @ (t_WorldTCPFrame + checkerboard_offset_from_tool)
+            p_WorldCharucocorner_Measured_sample = R.from_rotvec(R_WorldTCPFrame_asrotvec).apply(t_WorldTCPFrame + checkerboard_offset_from_tool)
 
             # tf trans represents the charuco tag corner point in camera coordinates
             p_CameraCharucocorner_Estimated_dic[serial_no].append(tf[:3, :3] @ tf[:3, 3])
@@ -219,6 +220,8 @@ def get_rigid_transform_error(z_scale):
     # Estimate rigid transform between measured points and new observed points
     # R, t = get_rigid_transform(np.asarray(measured_pts), np.asarray(new_observed_pts))
 
+    import pdb
+    pdb.set_trace()
     R_CameraWorld_Estimated, t_CameraWorld_Estimated = get_rigid_transform(np.asarray(p_WorldCharucocorner_Measured),
                                                        np.asarray(p_CameraCharucocorner_Estimated))
 
