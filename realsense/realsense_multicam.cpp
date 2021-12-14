@@ -117,7 +117,11 @@ Server::Server(int port) {
 }
 
 void Server::init_listener_thread() {
-    pthread_create(&listener_thread_id, NULL, (THREADFUNCPTR) &Server::listener_thread, this);
+    int rc = pthread_create(&listener_thread_id, NULL, (THREADFUNCPTR) &Server::listener_thread, this);
+    if (rc) {
+         std::cout << "Error:unable to create thread," << rc << std::endl;
+         exit(-1);
+      }
     pthread_mutex_init(&buffer_access_mutex, NULL);
 }
 
@@ -262,18 +266,16 @@ int main(int argc, char * argv[]) try {
     std::vector<Server> realsense_server_arr;
 //    std::vector<window> window_arr;
 
-//    for (int i=0; i<devices.size(); ++i) {
-    for (int i=0; i<1; ++i) {
+    for (int i=0; i<devices.size(); ++i) {
         printf("Initializing server... %d\n", i);
         Server realsense_server(50000 + i);
-//        realsense_server.init_listener_thread();
         realsense_server_arr.emplace_back(realsense_server);
-        realsense_server_arr.back().init_listener_thread();
+//        realsense_server_arr.back().init_listener_thread();
         }
-//
-//        window app(2560, 720, "RealSense Stream");
-//        window_arr.emplace_back(app);
-//    }
+
+    for (int i=0; i<devices.size(); ++i) {
+        realsense_server_arr[i].init_listener_thread();
+        }
 
     // Declare two textures on the GPU, one for color and one for depth
     texture depth_image, color_image;
