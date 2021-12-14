@@ -105,7 +105,7 @@ RUN cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-master/modules ../opencv
 RUN cmake --build .
 
 # this is needed for the headers...
-RUN apt-get install libopencv-core-dev
+#RUN apt-get install -y libopencv-core-dev
 COPY ./entrypoint.sh /
 
 ENTRYPOINT ["/entrypoint.sh"]

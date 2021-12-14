@@ -143,15 +143,15 @@ void * Server::listener_thread() {
         while(true) {
 
             // Parse ping from client
-            printf("139\n");
+//            printf("139\n");
 
             memset(receive_buffer, 0, sizeof(receive_buffer));
-            printf("141\n");
+//            printf("141\n");
 
             int resp_msg_size = recv(conn_sock, receive_buffer, 64, 0);
             if (resp_msg_size <= 0) break;
 
-            printf("146\n");
+//            printf("146\n");
 
             // Send buffer data
             pthread_mutex_lock(&buffer_access_mutex);
@@ -160,9 +160,9 @@ void * Server::listener_thread() {
             int tmp = errno;
             if (msg_size < 0) printf ("Errno %d\n", tmp);
 
-            printf("Before unlock\n");
+//            printf("Before unlock\n");
             pthread_mutex_unlock(&buffer_access_mutex);
-            printf("After unlock\n");
+//            printf("After unlock\n");
         }
     }
 }
@@ -432,7 +432,7 @@ int main(int argc, char * argv[]) try {
 
             color = q.wait_for_frame();
 
-//            depth_image.render(depth_colorized, {device_idx*app.width() / devices.size(), 0, app.width() / devices.size(), app.height() / 2});
+            depth_image.render(depth_colorized, {device_idx*app.width() / devices.size(), app.height() / 2, app.width() / devices.size(), app.height() / 2});
             color_image.render(color, {device_idx*app.width() / devices.size(), 0, app.width() / devices.size(), app.height() / 2});
             }
        }

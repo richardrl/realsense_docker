@@ -26,7 +26,7 @@ class Robot(object):
             for cam_idx in range(num_cameras):
                 tmp_cam = Camera(port=50000 + cam_idx)
                 self.cameras.append(tmp_cam)
-                self.cam_intrinsics.append(tmp_cam.intrinsics)
+                self.cams_intrinsics.append(tmp_cam.intrinsics)
                 print(f"Camera {cam_idx} loaded")
 
         # Load camera pose (from running calibrate.py), intrinsics and depth scale
@@ -73,9 +73,11 @@ class Robot(object):
         return color_img, depth_img
 
     def get_cameras_datas(self):
+        out = []
         for i in range(len(self.cameras)):
             color_img, depth_img = self.cameras[i].get_data()
-            yield self.cameras[i].serial_number, color_img, depth_img
+            out.append([self.cameras[i].serial_number, self.cams_intrinsics[i], color_img, depth_img])
+        return out
 
     def get_tcp_pose(self, print_euler=False):
         """

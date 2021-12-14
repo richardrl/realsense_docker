@@ -8,6 +8,8 @@ set -e
 
 export PYTHONPATH=/root/realsense_docker/:${PYTHONPATH}
 
+# the below line is CRITICAL for the headers in opencv
+# as well as adding things in the cmakelists to add the opencv headers
 export OpenCV_DIR=/root/build
 
 #eval "/usr/sbin/sshd"

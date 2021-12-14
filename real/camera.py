@@ -34,19 +34,20 @@ class Camera(object):
         # Ping the server with anything
         self.tcp_socket.send(b'asdf')
 
+        serial_size = 12
+
         # Fetch TCP data:
         #     color camera intrinsics, 9 floats, number of bytes: 9 x 4
         #     depth scale for converting depth from uint16 to float, 1 float, number of bytes: 4
         #     depth image, self.im_width x self.im_height uint16, number of bytes: self.im_width x self.im_height x 2
         #     color image, self.im_width x self.im_height x 3 uint8, number of bytes: self.im_width x self.im_height x 3
         data = b''
-        while len(data) < (10*4 + self.im_height*self.im_width*5):
-            print("Waiting for data...")
+        while len(data) < (serial_size + 10*4 + self.im_height*self.im_width*5):
+            # print("Waiting for data...")
             data += self.tcp_socket.recv(self.buffer_size)
-            print("Received data...")
+            # print("Received data...")
 
         # Reorganize TCP data into color and depth frame
-        serial_size = 12
         self.serial_number = data[0:(12)].decode("utf-8")
         self.intrinsics = np.fromstring(data[serial_size:serial_size+(9*4)], np.float32).reshape(3, 3)
         depth_scale = np.fromstring(data[serial_size+(9*4):serial_size+(10*4)], np.float32)[0]

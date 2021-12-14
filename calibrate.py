@@ -30,7 +30,9 @@ calib_grid_step = 0.05 * 1
 
 # position of the tool in the checkerboard frame
 # checkerboard_offset_from_tool = [0,-0.13,0.02]
-checkerboard_offset_from_tool = [-.04,0.06,0.17]
+
+# -.015 is the z offset due to slanted calib board
+checkerboard_offset_from_tool = [-.04,0.06,0.17-.015]
 
 # from tool0:
 # -4cm, 6cm, 17cm
@@ -107,15 +109,20 @@ for calib_pt_idx in range(num_calib_grid_pts):
     # EFFECTIVELY, this is doing things in the [90 deg, 0, 90 deg] fixed world frame xyz rotation
     robot.move_to(tool_position, tool_orientation)
     time.sleep(1)
+    cam_data = robot.get_cameras_datas()
+
+    time.sleep(1)
 
     # Find charuco corner
     # color_img, depth_img = robot.camera.get_data()
-    for serial_no, color_img, depth_img in robot.get_cameras_datas():
-        tf = charuco_util.get_charuco_tf(color_img, 0, robot.camera.intrinsics, np.zeros(4))
+    for serial_no, intrinsics, color_img, depth_img in cam_data:
+        tf = charuco_util.get_charuco_tf(color_img, 0, intrinsics, np.zeros(4))
+
         plt.subplot(211)
         plt.imshow(color_img)
         plt.subplot(212)
-        plt.imshow(depth_img)
+
+        plt.imshow(depth_img,cmap='nipy_spectral_r')
         plt.show()
 
         if serial_no not in observed_pts_dic.keys():
@@ -131,7 +138,7 @@ for calib_pt_idx in range(num_calib_grid_pts):
             tool_position = tool_position + checkerboard_offset_from_tool
 
             # tf trans represents the charuco tag corner point in camera coordinates
-            observed_pts_dic[serial_no].append(tf.trans)
+            observed_pts_dic[serial_no].append(tf[:3, 3])
             measured_pts_dic[serial_no].append(tool_position)
             observed_pix_dic[serial_no].append(color_img)
 
