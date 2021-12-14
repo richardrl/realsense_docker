@@ -12,6 +12,6 @@ while len(data) < (10 * 4 + cam.im_height * cam.im_width * 5):
     data += cam.tcp_socket.recv(cam.buffer_size)
     print("Received data...")
 
-dummy_serial = np.fromstring(data[0:(6*4)], np.int32)
+dummy_serial = data[0:(12)].decode("utf-8")
 
 print(dummy_serial)
