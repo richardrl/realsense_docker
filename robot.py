@@ -72,6 +72,11 @@ class Robot(object):
         color_img, depth_img = self.cameras[idx].get_data()
         return color_img, depth_img
 
+    def get_cameras_datas(self):
+        for i in range(len(self.cameras)):
+            color_img, depth_img = self.cameras[i].get_data()
+            yield color_img, depth_img
+
     def get_tcp_pose(self, print_euler=False):
         """
 

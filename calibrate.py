@@ -105,23 +105,22 @@ for calib_pt_idx in range(num_calib_grid_pts):
     time.sleep(1)
 
     # Find charuco corner
-    color_img, depth_img = robot.camera.get_data()
+    # color_img, depth_img = robot.camera.get_data()
+    for color_img, depth_img in robot.get_cameras_datas():
+        tf = charuco_util.get_charuco_tf(color_img, 0, robot.camera.intrinsics, np.zeros(4))
+        plt.subplot(211)
+        plt.imshow(color_img)
+        plt.subplot(212)
+        plt.imshow(depth_img)
+        plt.show()
 
-    tf = charuco_util.get_charuco_tf(color_img, 0, robot.camera.intrinsics, np.zeros(4))
+        if tf is not None:
+            print(f"Found tf at {tool_position}")
+            observed_pts.append(0)
+            tool_position = tool_position + checkerboard_offset_from_tool
 
-    # plt.subplot(211)
-    # plt.imshow(color_img)
-    # plt.subplot(212)
-    # plt.imshow(depth_img)
-    # plt.show()
-
-    if tf is not None:
-        print(f"Found tf at {tool_position}")
-        observed_pts.append(0)
-        tool_position = tool_position + checkerboard_offset_from_tool
-
-        measured_pts.append(tool_position)
-        observed_pix.append(color_img)
+            measured_pts.append(tool_position)
+            observed_pix.append(color_img)
 
     # plt.subplot(211)
     # plt.imshow(color_img)

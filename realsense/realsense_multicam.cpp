@@ -374,13 +374,18 @@ int main(int argc, char * argv[]) try {
 //            realsense_server_arr[device_idx].update_buffer((unsigned char*)&depth_scale, 9*4, 4);
 
             int depth_size = aligned_depth.get_width()*aligned_depth.get_height()*aligned_depth.get_bytes_per_pixel();
-            realsense_server_arr[0].update_buffer((unsigned char*)aligned_depth.get_data(), 10*4, depth_size);
+            realsense_server_arr[device_idx].update_buffer((unsigned char*)aligned_depth.get_data(), 10*4, depth_size);
             int color_size = data.get_color_frame().get_width()*data.get_color_frame().get_height()*data.get_color_frame().get_bytes_per_pixel();
-            realsense_server_arr[0].update_buffer((unsigned char*)color.get_data(), 10*4 + depth_size, color_size);
+            realsense_server_arr[device_idx].update_buffer((unsigned char*)color.get_data(), 10*4 + depth_size, color_size);
 
             // Send camera intrinsics and depth scale
-            realsense_server_arr[0].update_buffer((unsigned char*)color_intrinsics_arr, 0, 9*4);
-            realsense_server_arr[0].update_buffer((unsigned char*)&depth_scale, 9*4, 4);
+            realsense_server_arr[device_idx].update_buffer((unsigned char*)color_intrinsics_arr, 0, 9*4);
+            realsense_server_arr[device_idx].update_buffer((unsigned char*)&depth_scale, 9*4, 4);
+
+            // send serial number
+            int dummy_serial[6] = {333, 333, 333, 333, 333, 333};
+
+            realsense_server_arr[device_idx].update_buffer((unsigned char*) dummy_serial, 0, 6*4);
             // Render depth on to the first half of the screen and color on to the second
 //            depth_image.render(depth_colorized, { 0, 0, app.width() / 2, app.height() });
 //            color_image.render(color, { app.width() / 2, 0, app.width() / 2, app.height() });
