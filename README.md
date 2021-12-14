@@ -1,3 +1,10 @@
+# Unique features
+- Supports multiple cameras visualization and TCP server streaming in realsense.cpp
+- Does Charuco board frame detection and visualization in realsense.cpp
+- Refactored calibration.py with Spatial Algebra syntax so that it is very clear what transforms are happening
+- Replaced the chessboard in calibration.py with a Charuco board
+
+# Docker notes
 realsense_docker.dockerfile
 
 - Confirmed working with realsense-viewer GUI
