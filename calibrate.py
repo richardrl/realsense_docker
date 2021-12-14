@@ -59,7 +59,7 @@ observed_pix = []
 print('Connecting to robot...')
 robot = Robot(False, None, None, workspace_limits,
               tcp_host_ip, tcp_port, rtc_host_ip, rtc_port,
-              False, None, None, load_camera=True)
+              False, None, None, num_cameras=3)
 # robot.open_gripper()
 
 # Slow down robot

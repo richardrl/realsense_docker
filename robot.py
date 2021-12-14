@@ -14,15 +14,20 @@ rtde_r = rtde_receive.RTDEReceiveInterface(os.environ['UR5_IP'])
 class Robot(object):
     def __init__(self, is_sim, obj_mesh_dir, num_obj, workspace_limits,
                  tcp_host_ip, tcp_port, rtc_host_ip, rtc_port,
-                 is_testing, test_preset_cases, test_preset_file, load_camera=False):
+                 is_testing, test_preset_cases, test_preset_file, num_cameras=0):
         self.workspace_limits = workspace_limits
 
-        if load_camera:
+        if num_cameras:
             print("Attempting to load camera")
             from real.camera import Camera
-            self.camera = Camera(port=50000)
-            self.cam_intrinsics = self.camera.intrinsics
-            print("Camera loaded")
+
+            self.cameras = []
+            self.cams_intrinsics = []
+            for cam_idx in range(num_cameras):
+                tmp_cam = Camera(port=50000 + cam_idx)
+                self.cameras.append(tmp_cam)
+                self.cam_intrinsics.append(tmp_cam.intrinsics)
+                print(f"Camera {cam_idx} loaded")
 
         # Load camera pose (from running calibrate.py), intrinsics and depth scale
         # self.cam_pose = np.loadtxt('real/camera_pose.txt', delimiter=' ')
@@ -63,8 +68,8 @@ class Robot(object):
     def go_home(self):
         rtde_c.moveJ(self.home_joint_config, speed=self.joint_vel, acceleration=self.joint_acc)
 
-    def get_camera_data(self):
-        color_img, depth_img = self.camera.get_data()
+    def get_camera_data(self, idx):
+        color_img, depth_img = self.cameras[idx].get_data()
         return color_img, depth_img
 
     def get_tcp_pose(self, print_euler=False):
