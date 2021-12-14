@@ -23,10 +23,13 @@ class Robot(object):
 
             self.cameras = []
             self.cams_intrinsics = []
+            self.serialno2intrinsics = dict()
+
             for cam_idx in range(num_cameras):
                 tmp_cam = Camera(port=50000 + cam_idx)
                 self.cameras.append(tmp_cam)
                 self.cams_intrinsics.append(tmp_cam.intrinsics)
+                self.serialno2intrinsics[tmp_cam.serial_number] = tmp_cam.intrinsics
                 print(f"Camera {cam_idx} loaded")
 
         # Load camera pose (from running calibrate.py), intrinsics and depth scale
