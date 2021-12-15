@@ -1,13 +1,9 @@
 #!/usr/bin/env python
 
-import matplotlib.pyplot as plt
 import numpy as np
 import time
-import cv2
-from real.camera import Camera
 from robot import Robot
 from scipy import optimize
-from mpl_toolkits.mplot3d import Axes3D
 import os
 import charuco_util
 from scipy.spatial.transform import Rotation as R
@@ -15,6 +11,8 @@ from scipy.spatial.transform import Rotation as R
 
 # User options (change me)
 # --------------- Setup options ---------------
+from utils.calibration_util import get_rigid_transform
+
 tcp_host_ip = os.environ['UR5_IP'] # IP and port to robot arm as TCP client (UR5)
 tcp_port = 30002
 rtc_host_ip = os.environ['UR5_IP'] # IP and port to robot arm as real-time client (UR5)
@@ -159,40 +157,6 @@ for k in p_CameraCharucocorner_Estimated_dic.keys():
     # observed_pix_dic[k] = np.asarray(observed_pix_dic[k])
 
 
-# Estimate rigid transform with SVD (from Nghia Ho)
-def get_rigid_transform(A, B):
-    """
-    Gets the rigid transform from A to B
-
-    which is also
-
-    X_BA
-
-    because we right multiply points in A to get points in B
-
-    Args:
-        A:
-        B:
-
-    Returns:
-
-    """
-    assert len(A) == len(B)
-    N = A.shape[0] # Total points
-    centroid_A = np.mean(A, axis=0)
-    centroid_B = np.mean(B, axis=0)
-    AA = A - np.tile(centroid_A, (N, 1)) # Centre the points
-    BB = B - np.tile(centroid_B, (N, 1))
-    H = np.dot(np.transpose(AA), BB) # Dot is matrix multiplication for array
-    U, S, Vt = np.linalg.svd(H)
-    R = np.dot(Vt.T, U.T)
-    if np.linalg.det(R) < 0: # Special reflection case
-       Vt[2,:] *= -1
-       R = np.dot(Vt.T, U.T)
-    t = np.dot(-R, centroid_A.T) + centroid_B.T
-    return R, t
-
-
 def get_rigid_transform_error(z_scale):
     global p_WorldCharucocorner_Measured, p_CameraCharucocorner_Estimated, X_CameraWorld, cam_intrinsics
     """
@@ -225,7 +189,7 @@ def get_rigid_transform_error(z_scale):
     assert p_CameraCharucocorner_Estimated.shape[0] > 1
 
     R_CameraWorld_Estimated, t_CameraWorld_Estimated = get_rigid_transform(np.asarray(p_WorldCharucocorner_Measured),
-                                                       np.asarray(p_CameraCharucocorner_Estimated))
+                                                                           np.asarray(p_CameraCharucocorner_Estimated))
 
     t_CameraWorld_Estimated.shape = (3,1)
 

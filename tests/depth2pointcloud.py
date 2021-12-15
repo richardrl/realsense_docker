@@ -45,6 +45,11 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
     # plt.imshow(serial_no2depth_imgs_dic[serial_no],cmap='nipy_spectral_r')
     # plt.show()
     #
+    np.set_printoptions(formatter={'float': "{0:0.3f}".format})
+    print(f"{serial_no}")
+
+    print(f"Extrinsics: ")
+    print(serial_no2extrinsics_dic[serial_no])
 
     p_WorldScene, p_CamScene = convert_depth_to_pointcloud(serial_no2depth_imgs_dic[serial_no],
                                                serial_no2extrinsics_dic[serial_no],
