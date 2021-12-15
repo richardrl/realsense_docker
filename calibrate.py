@@ -140,11 +140,12 @@ for calib_pt_idx in range(num_calib_grid_pts):
             # confirm this by drawing XY simple point and rotating
             # think about placing the translation in the world frame first. How do we get it to now align with the full
             # position in the world frame? We rotate it
-            p_WorldCharucocorner_Measured_sample = R.from_rotvec(R_WorldTCPFrame_asrotvec).apply(t_WorldTCPFrame + checkerboard_offset_from_tool)
+            # TODO: the below code is wrong
 
             # tf trans represents the charuco tag corner point in camera coordinates
-            p_CameraCharucocorner_Estimated_dic[serial_no].append(tf[:3, :3] @ tf[:3, 3])
+            p_CameraCharucocorner_Estimated_dic[serial_no].append(tf[:3, 3])
 
+            p_WorldCharucocorner_Measured_sample = t_WorldTCPFrame + checkerboard_offset_from_tool
             p_WorldCharucocorner_Measured_dic[serial_no].append(p_WorldCharucocorner_Measured_sample)
             # observed_pix_dic[serial_no].append(color_img)
 

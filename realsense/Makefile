@@ -111,6 +111,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named realsense_multicam_headless
+
+# Build rule for target.
+realsense_multicam_headless: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 realsense_multicam_headless
+.PHONY : realsense_multicam_headless
+
+# fast build rule for target.
+realsense_multicam_headless/fast:
+	$(MAKE) -f CMakeFiles/realsense_multicam_headless.dir/build.make CMakeFiles/realsense_multicam_headless.dir/build
+.PHONY : realsense_multicam_headless/fast
+
+#=============================================================================
 # Target rules for targets named realsense
 
 # Build rule for target.
@@ -190,6 +203,33 @@ realsense_multicam.cpp.s:
 	$(MAKE) -f CMakeFiles/realsense_multicam.dir/build.make CMakeFiles/realsense_multicam.dir/realsense_multicam.cpp.s
 .PHONY : realsense_multicam.cpp.s
 
+realsense_multicam_headless.o: realsense_multicam_headless.cpp.o
+
+.PHONY : realsense_multicam_headless.o
+
+# target to build an object file
+realsense_multicam_headless.cpp.o:
+	$(MAKE) -f CMakeFiles/realsense_multicam_headless.dir/build.make CMakeFiles/realsense_multicam_headless.dir/realsense_multicam_headless.cpp.o
+.PHONY : realsense_multicam_headless.cpp.o
+
+realsense_multicam_headless.i: realsense_multicam_headless.cpp.i
+
+.PHONY : realsense_multicam_headless.i
+
+# target to preprocess a source file
+realsense_multicam_headless.cpp.i:
+	$(MAKE) -f CMakeFiles/realsense_multicam_headless.dir/build.make CMakeFiles/realsense_multicam_headless.dir/realsense_multicam_headless.cpp.i
+.PHONY : realsense_multicam_headless.cpp.i
+
+realsense_multicam_headless.s: realsense_multicam_headless.cpp.s
+
+.PHONY : realsense_multicam_headless.s
+
+# target to generate assembly for a file
+realsense_multicam_headless.cpp.s:
+	$(MAKE) -f CMakeFiles/realsense_multicam_headless.dir/build.make CMakeFiles/realsense_multicam_headless.dir/realsense_multicam_headless.cpp.s
+.PHONY : realsense_multicam_headless.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -197,6 +237,7 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... realsense_multicam_headless"
 	@echo "... realsense"
 	@echo "... rebuild_cache"
 	@echo "... realsense_multicam"
@@ -206,6 +247,9 @@ help:
 	@echo "... realsense_multicam.o"
 	@echo "... realsense_multicam.i"
 	@echo "... realsense_multicam.s"
+	@echo "... realsense_multicam_headless.o"
+	@echo "... realsense_multicam_headless.i"
+	@echo "... realsense_multicam_headless.s"
 .PHONY : help
 
 

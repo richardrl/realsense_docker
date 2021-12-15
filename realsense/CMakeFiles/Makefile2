@@ -60,6 +60,43 @@ CMAKE_SOURCE_DIR = /root/realsense_docker/realsense
 CMAKE_BINARY_DIR = /root/realsense_docker/realsense
 
 #=============================================================================
+# Target rules for target CMakeFiles/realsense_multicam_headless.dir
+
+# All Build rule for target.
+CMakeFiles/realsense_multicam_headless.dir/all:
+	$(MAKE) -f CMakeFiles/realsense_multicam_headless.dir/build.make CMakeFiles/realsense_multicam_headless.dir/depend
+	$(MAKE) -f CMakeFiles/realsense_multicam_headless.dir/build.make CMakeFiles/realsense_multicam_headless.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/root/realsense_docker/realsense/CMakeFiles --progress-num=5,6 "Built target realsense_multicam_headless"
+.PHONY : CMakeFiles/realsense_multicam_headless.dir/all
+
+# Include target in all.
+all: CMakeFiles/realsense_multicam_headless.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/realsense_multicam_headless.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /root/realsense_docker/realsense/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/realsense_multicam_headless.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /root/realsense_docker/realsense/CMakeFiles 0
+.PHONY : CMakeFiles/realsense_multicam_headless.dir/rule
+
+# Convenience name for target.
+realsense_multicam_headless: CMakeFiles/realsense_multicam_headless.dir/rule
+
+.PHONY : realsense_multicam_headless
+
+# clean rule for target.
+CMakeFiles/realsense_multicam_headless.dir/clean:
+	$(MAKE) -f CMakeFiles/realsense_multicam_headless.dir/build.make CMakeFiles/realsense_multicam_headless.dir/clean
+.PHONY : CMakeFiles/realsense_multicam_headless.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/realsense_multicam_headless.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/realsense.dir
 
 # All Build rule for target.

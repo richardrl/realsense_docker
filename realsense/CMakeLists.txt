@@ -64,3 +64,11 @@ find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 target_link_libraries(realsense_multicam ${OpenCV_LIBS})
 target_include_directories(realsense_multicam PRIVATE "/realsense")
+
+
+add_executable(realsense_multicam_headless realsense_multicam_headless.cpp)
+target_link_libraries(realsense_multicam_headless pthread ${DEPENDENCIES} ${PROJECT_LINK_LIBS})
+
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+target_link_libraries(realsense_multicam_headless ${OpenCV_LIBS})
+target_include_directories(realsense_multicam_headless PRIVATE "/realsense")

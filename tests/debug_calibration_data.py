@@ -14,6 +14,11 @@ open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(ob
                                                                               normalize_color=True),
                                       open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
 
+open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(measured_pts[measured_pts[:, 2] < 1],
+                                         [1, 0, 0],
+                                                                              normalize_color=True),
+                                      open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
+
 # calculate X_CW
 R, t = get_rigid_transform(np.asarray(measured_pts), np.asarray(observed_pts))
 print("Debug live calculated R and t")
