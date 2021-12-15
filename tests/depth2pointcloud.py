@@ -6,6 +6,15 @@ from utils.camera_util import convert_depth_to_pointcloud
 from utils import visualization_util
 import open3d
 
+"""
+Start Config
+"""
+cam_color_segment = True
+
+"""
+End Config
+"""
+
 # load extrinsics
 
 serial_no2intrinsics_dic = dict()
@@ -55,15 +64,19 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
                                                serial_no2extrinsics_dic[serial_no],
                                                serial_no2intrinsics_dic[serial_no])
 
-    # debug p_CamScene
-    open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(p_CamScene[p_CamScene[:, 2] < 1],
-                                                               serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
-                                                               normalize_color=True),
-                                          open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
+    # debug individual p_CamScene
+    # open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(p_CamScene[p_CamScene[:, 2] < 1],
+    #                                                            serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
+    #                                                            normalize_color=True),
+    #                                       open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
 
-    # if len(geometries) < 1:
-    geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[p_CamScene[:, 2] < 1],
-                                                               serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
-                                                               normalize_color=True))
+    if cam_color_segment:
+        geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[p_CamScene[:, 2] < 1],
+                                                                   colors[cam_idx],
+                                                                   normalize_color=False))
+    else:
+        geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[p_CamScene[:, 2] < 1],
+                                                                   serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
+                                                                   normalize_color=True))
 
 open3d.visualization.draw_geometries(geometries)

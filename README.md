@@ -22,9 +22,19 @@ realsense_docker_from_source.dockerfile
 - https://dev.intelrealsense.com/docs/open-source-ethernet-networking-for-intel-realsense-depth-cameras
 
 
-# Camera Calibration
-checkerboard_offset_from_tool = 
+# Camera Calibration Settings
+checkerboard_offset_from_tool is the translation of the Charuco board corner point from the tool center point frame
+
+# Results
+- Combined
+![combined](images/combined_cams.png)
+
+- Combined showing each camera's points
+![combined_color](images/combined_cams_color.png)
+
+# Pinhole camera model
+![pinhole](images/pinhole.png)
 
 # Notes
 - Opencv does the axis as bgr instead of rgb
-- ptype to get type https://stackoverflow.com/questions/9568201/gdb-show-typeinfo-of-some-data
+- Use ptype to get type of variable in GDB https://stackoverflow.com/questions/9568201/gdb-show-typeinfo-of-some-data
