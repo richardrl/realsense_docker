@@ -19,12 +19,13 @@ tcp_host_ip = os.environ['UR5_IP'] # IP and port to robot arm as TCP client (UR5
 tcp_port = 30002
 rtc_host_ip = os.environ['UR5_IP'] # IP and port to robot arm as real-time client (UR5)
 rtc_port = 30003
+SLEEP_TIME = 1
 
-# reduce z because none of them are available
-# workspace_limits = np.asarray([[0.4, 0.648], [-.2, 0.3], [-.08, .05]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
+# full calibration workspace
+workspace_limits = np.asarray([[0.4, 0.648], [-.2, 0.3], [-.08, .05]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
 
 # do small amount of grid points to test the optimization code
-workspace_limits = np.asarray([[0.4, 0.5], [0, 0.1], [-.08, 0]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
+# workspace_limits = np.asarray([[0.4, 0.5], [0, 0.1], [-.08, 0]]) # Cols: min max, Rows: x y z (define workspace limits in robot coordinates)
 
 calib_grid_step = 0.05 * 1
 # checkerboard_offset_from_tool = [0,-0.13,0.02]
@@ -109,10 +110,10 @@ for calib_pt_idx in range(num_calib_grid_pts):
 
     # EFFECTIVELY, this is doing things in the [90 deg, 0, 90 deg] fixed world frame xyz rotation
     robot.move_to(t_WorldTCPFrame, R_WorldTCPFrame_asrotvec)
-    time.sleep(.3)
+    time.sleep(SLEEP_TIME)
     cam_data = robot.get_cameras_datas()
 
-    time.sleep(.3)
+    time.sleep(SLEEP_TIME)
 
     # Find charuco corner
     # color_img, depth_img = robot.camera.get_data()
@@ -135,7 +136,7 @@ for calib_pt_idx in range(num_calib_grid_pts):
             # observed_pix_dic[serial_no] = []
 
         if tf is not None:
-            print(f"Found tf at {t_WorldTCPFrame}")
+            print(f"Found tf at {t_WorldTCPFrame} for {serial_no}")
 
             # check if the shapes are right
             # confirm this by drawing XY simple point and rotating
@@ -220,6 +221,9 @@ def get_rigid_transform_error(z_scale):
     # Estimate rigid transform between measured points and new observed points
     # R, t = get_rigid_transform(np.asarray(measured_pts), np.asarray(new_observed_pts))
 
+    # for some reason, if we only have one point, it doesn't seem to work..
+    assert p_CameraCharucocorner_Estimated.shape[0] > 1
+
     R_CameraWorld_Estimated, t_CameraWorld_Estimated = get_rigid_transform(np.asarray(p_WorldCharucocorner_Measured),
                                                        np.asarray(p_CameraCharucocorner_Estimated))
 
@@ -238,6 +242,13 @@ def get_rigid_transform_error(z_scale):
     rmse = np.sqrt(error / p_WorldCharucocorner_Measured.shape[0])
     return rmse
 
+# save data for debugging
+for serial_no in p_CameraCharucocorner_Estimated_dic.keys():
+    np.savetxt(f"out/{serial_no}_p_CameraCharucocorner_Estimated.txt",
+               p_CameraCharucocorner_Estimated_dic[serial_no], delimiter=' ')
+
+    np.savetxt(f"out/{serial_no}_p_WorldCharucocorner_Measured.txt",
+               p_WorldCharucocorner_Measured_dic[serial_no], delimiter=' ')
 
 # optimize for each camera
 for serial_no in p_CameraCharucocorner_Estimated_dic.keys():
@@ -257,6 +268,6 @@ for serial_no in p_CameraCharucocorner_Estimated_dic.keys():
     print('Saving...')
     np.savetxt(f"out/{serial_no}_camera_depth_scale.txt", camera_depth_offset, delimiter=' ')
     get_rigid_transform_error(camera_depth_offset)
-    camera_pose = np.linalg.inv(X_CameraWorld)
-    np.savetxt(f"out/{serial_no}_camera_pose.txt", camera_pose, delimiter=' ')
+    X_WorldCamera = np.linalg.inv(X_CameraWorld)
+    np.savetxt(f"out/{serial_no}_camera_pose.txt", X_WorldCamera, delimiter=' ')
     print('Done.')

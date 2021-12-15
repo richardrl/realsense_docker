@@ -104,6 +104,7 @@ WORKDIR build
 RUN cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-master/modules ../opencv-master -DCUDA_ARCH_BIN=10.0
 RUN cmake --build .
 
+RUN pip3 install open3d
 # this is needed for the headers...
 #RUN apt-get install -y libopencv-core-dev
 COPY ./entrypoint.sh /
