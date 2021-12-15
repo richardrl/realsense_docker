@@ -7,7 +7,7 @@ def convert_depth_to_pointcloud(depth_ims, camera_ext, camera_int):
     """
     This only works if there was no image segmentation done
     :param depth_ims: m x n
-    :param camera_ext: 4 x 4
+    :param camera_ext: 4 x 4. X_WC
     :param camera_int: 3 x 3
     :return:
         pointcloud: (mxn) x 3

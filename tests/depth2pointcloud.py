@@ -21,8 +21,8 @@ cameras = [Camera(port=50000 + i) for i in range(3)]
 
 for txt in txts:
     if "camera_pose" in txt:
-        extrinsics_mat = np.loadtxt(txt)
-        serial_no2extrinsics_dic[txt.split("_")[0].split("/")[-1]] = extrinsics_mat
+        X_WC = np.loadtxt(txt)
+        serial_no2extrinsics_dic[txt.split("_")[0].split("/")[-1]] = X_WC.copy()
 
 # convert the depth images from each camera into pointclouds
 
@@ -54,8 +54,15 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
     p_WorldScene, p_CamScene = convert_depth_to_pointcloud(serial_no2depth_imgs_dic[serial_no],
                                                serial_no2extrinsics_dic[serial_no],
                                                serial_no2intrinsics_dic[serial_no])
+
+    # debug p_CamScene
+    open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(p_CamScene[p_CamScene[:, 2] < 1],
+                                                               serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
+                                                               normalize_color=True),
+                                          open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
+
     # if len(geometries) < 1:
-    geometries.append(visualization_util.make_point_cloud_o3d( p_WorldScene[p_CamScene[:, 2] < 1],
+    geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[p_CamScene[:, 2] < 1],
                                                                serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
                                                                normalize_color=True))
 
