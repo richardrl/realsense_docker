@@ -5,19 +5,19 @@ import open3d
 from utils import visualization_util
 
 
-observed_pts = np.loadtxt('../out/949322060350_p_CameraCharucocorner_Estimated', delimiter=' ')
-measured_pts = np.loadtxt('../out/949322060350_p_WorldCharucocorner_Measured', delimiter=' ')
+observed_pts = np.loadtxt('../out/949322060350_p_CameraCharucocorner_Estimated.txt', delimiter=' ')
+measured_pts = np.loadtxt('../out/949322060350_p_WorldCharucocorner_Measured.txt', delimiter=' ')
 
 # visualize the charuco points in camera frame
-open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(observed_pts[observed_pts[:, 2] < 1],
-                                         [1, 0, 0],
-                                                                              normalize_color=True),
-                                      open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
-
-open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(measured_pts[measured_pts[:, 2] < 1],
-                                         [1, 0, 0],
-                                                                              normalize_color=True),
-                                      open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
+# open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(observed_pts[observed_pts[:, 2] < 1],
+#                                          [1, 0, 0],
+#                                                                               normalize_color=True),
+#                                       open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
+#
+# open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(measured_pts[measured_pts[:, 2] < 1],
+#                                          [1, 0, 0],
+#                                                                               normalize_color=True),
+#                                       open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
 
 # calculate X_CW
 R, t = get_rigid_transform(np.asarray(measured_pts), np.asarray(observed_pts))
@@ -29,6 +29,7 @@ print(t)
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
+# visualize the world frame points
 ax.scatter(measured_pts[:,0], measured_pts[:,1], measured_pts[:,2], c='red')
 
 X_CW = np.zeros((4, 4))
@@ -36,9 +37,13 @@ X_CW[:3, :3] = R.copy()
 X_CW[:3, 3] = t.copy()
 X_CW[3, 3] = 1
 
+# map the camera points into the world frame
 world_transformed_observed_pts = (np.linalg.inv(X_CW)[:3, :3] @ observed_pts.T).T + np.linalg.inv(X_CW)[:3, 3]
 ax.scatter(world_transformed_observed_pts[:,0], world_transformed_observed_pts[:,1], world_transformed_observed_pts[:,2], c='blue')
 
+print("ln44 camera then world")
+print(observed_pts[0, :])
+print(world_transformed_observed_pts[0, :])
 
 # visualize things in camera frame
 fig = plt.figure()
@@ -52,9 +57,15 @@ ax.scatter(new_observed_pts[:,0], new_observed_pts[:,1], new_observed_pts[:,2], 
 # apply X_CW from file
 X_WC_from_file = np.loadtxt("../out/949322060350_camera_pose.txt", delimiter=' ')
 X_CW_from_file = np.linalg.inv(X_WC_from_file)
+
+# map the world into camera
 new_observed_pts_2 = (X_CW_from_file[:3, :3] @ measured_pts.T).T + X_CW_from_file[:3, 3]
 ax.scatter(new_observed_pts_2[:,0], new_observed_pts_2[:,1], new_observed_pts_2[:,2], c='red')
 
+print("ln65")
+print("world then camera")
+print(measured_pts[0, :])
+print(new_observed_pts_2[0, :])
 plt.show()
 
 # print(camera_depth_offset)

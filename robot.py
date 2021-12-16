@@ -47,7 +47,7 @@ class Robot(object):
         self.joint_tolerance = 0.01
 
         # Default tool speed configuration
-        self.tool_acc = 1.5  # Safe: 0.5
+        self.tool_acc = 0.5  # Safe: 0.5
         self.tool_vel = 0.2  # Safe: 0.2
 
         # Tool pose tolerance for blocking calls

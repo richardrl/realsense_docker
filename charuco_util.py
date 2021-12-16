@@ -27,7 +27,7 @@ def get_charuco_tf(image, board_num, camera_matrix, dist_coeffs):
                                                             dist_coeffs, None, None)
 
     if retval:
-        tf = make_tf(rvec, tvec)
+        tf = make_tf(rvec, tvec).copy()
     else:
         # print("Board not detected!")
         tf = None

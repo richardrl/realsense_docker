@@ -15,8 +15,8 @@ for txt in txts:
     if "p_CameraCharucocorner_Estimated" in txt:
         serial_no = txt.split("_")[0].split("/")[-1]
         print(f"Calculating for {serial_no}")
-        observed_pts = np.loadtxt(f'../out/{serial_no}_p_CameraCharucocorner_Estimated', delimiter=' ')
-        measured_pts = np.loadtxt(f'../out/{serial_no}_p_WorldCharucocorner_Measured', delimiter=' ')
+        observed_pts = np.loadtxt(f'../out/{serial_no}_p_CameraCharucocorner_Estimated.txt', delimiter=' ')
+        measured_pts = np.loadtxt(f'../out/{serial_no}_p_WorldCharucocorner_Measured.txt', delimiter=' ')
 
         R, t = get_rigid_transform(np.asarray(measured_pts), np.asarray(observed_pts))
 

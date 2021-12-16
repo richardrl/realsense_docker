@@ -9,7 +9,7 @@ import open3d
 """
 Start Config
 """
-cam_color_segment = True
+cam_color_segment = False
 
 """
 End Config
