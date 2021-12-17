@@ -189,6 +189,10 @@ void Server::update_buffer(const unsigned char * data, int offset, unsigned long
 // Configure all streams to run at 1280x720 resolution at 30 frames per second
 const int stream_width = 1280;
 const int stream_height = 720;
+
+//const int stream_width = 640;
+//const int stream_height = 480;
+
 const int stream_fps = 30;
 const int depth_disparity_shift = 50;
 
@@ -266,14 +270,14 @@ int main(int argc, char * argv[]) try {
     std::vector<Server> realsense_server_arr;
 //    std::vector<window> window_arr;
 
-    for (int i=0; i<devices.size(); ++i) {
+    for (int i=0; i<1; ++i) {
         printf("Initializing server... %d\n", i);
         Server realsense_server(50000 + i);
         realsense_server_arr.emplace_back(realsense_server);
 //        realsense_server_arr.back().init_listener_thread();
         }
 
-    for (int i=0; i<devices.size(); ++i) {
+    for (int i=0; i<1; ++i) {
         realsense_server_arr[i].init_listener_thread();
         }
 
@@ -286,7 +290,9 @@ int main(int argc, char * argv[]) try {
 
     // Initialize & store array of multiple pipelines
     std::vector<rs2::pipeline>  pipelines;
-    for (auto&& dev : ctx.query_devices())
+
+    // TODO: maybe use indexes here instead of query devices... might be fing things up
+//    for (auto&& dev : ctx.query_devices())
     {
 //        rs2::pipeline pipe(ctx);
 //        rs2::config cfg;
@@ -298,10 +304,11 @@ int main(int argc, char * argv[]) try {
         config_pipe.enable_stream(rs2_stream::RS2_STREAM_COLOR, stream_width, stream_height, RS2_FORMAT_RGB8, stream_fps);
         config_pipe.enable_device(dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
 
-        rs2::pipeline pipe;
-        pipe.start(config_pipe);
+        rs2::pipeline pipe(ctx);
         pipelines.emplace_back(pipe);
 
+
+        pipe.start(config_pipe);
         std::cout << "Device information: " << std::endl;
         for (int i = 0; i < static_cast<int>(RS2_CAMERA_INFO_COUNT); i++) {
               rs2_camera_info info_type = static_cast<rs2_camera_info>(i);
@@ -312,21 +319,27 @@ int main(int argc, char * argv[]) try {
                   std::cout << "N/A" << std::endl;
         }
 
+    }
+
+    for (auto&& pipe : pipelines) {
         // Capture 30 frames to give autoexposure, etc. a chance to settle
         for (int i = 0; i < 30; ++i) pipe.wait_for_frames();
     }
 
+    // TODO: how does this align actually take each device into account?
     rs2::align align(rs2_stream::RS2_STREAM_COLOR);
     while(app) {
 //        for (auto&& dev : ctx.query_devices())
 //        for (auto&& pipe : pipelines)
 
-        for (int device_idx=0; device_idx<devices.size(); ++device_idx)
+        for (int device_idx=0; device_idx<1; ++device_idx)
         {
 //            rs2::pipeline_profile active_pipe_profile = pipe.get_active_profile();
 //            rs2::device dev = active_pipe_profile.get_device();
             // Get active device sensors
 
+            // TODO: is this possibly stochastic?
+            // no, it can't be...
             rs2::device dev = ctx.query_devices()[device_idx];
 
             rs2::pipeline pipe = pipelines[device_idx];
@@ -350,28 +363,18 @@ int main(int argc, char * argv[]) try {
 
 
             // Wait for next set of frames from the camera
-            rs2::frameset data = pipe.wait_for_frames();
-            rs2::frame color = data.get_color_frame();
+            rs2::frameset depth_and_color_frameset = pipe.wait_for_frames();
+
+//            rs2::frame color = depth_and_color_frameset.get_color_frame();
+//            rs2::depth_frame aligned_depth = depth_and_color_frameset.get_depth_frame();
 
             // Get both raw and aligned depth frames
-            auto processed = align.process(data);
+            auto processed = align.process(depth_and_color_frameset);
             rs2::depth_frame aligned_depth = processed.get_depth_frame();
+            rs2::video_frame color = processed.first(rs2_stream::RS2_STREAM_COLOR);
 
-            // Find and colorize the depth data
+            // Find and colorize the depth depth_and_color_frameset
             rs2::frame depth_colorized = aligned_depth.apply_filter(color_map);
-
-//            std::cout << "Updating device " << device_idx << std::endl;
-
-
-//            int depth_size = aligned_depth.get_width()*aligned_depth.get_height()*aligned_depth.get_bytes_per_pixel();
-//            realsense_server_arr[device_idx].update_buffer((unsigned char*)aligned_depth.get_data(), 10*4, depth_size);
-//
-//            int color_size = data.get_color_frame().get_width()*data.get_color_frame().get_height()*data.get_color_frame().get_bytes_per_pixel();
-//            realsense_server_arr[device_idx].update_buffer((unsigned char*)color.get_data(), 10*4 + depth_size, color_size);
-//
-//            // Send camera intrinsics and depth scale
-//            realsense_server_arr[device_idx].update_buffer((unsigned char*)color_intrinsics_arr, 0, 9*4);
-//            realsense_server_arr[device_idx].update_buffer((unsigned char*)&depth_scale, 9*4, 4);
 
             // Structure
             // First 12 chars are serial number
@@ -383,7 +386,7 @@ int main(int argc, char * argv[]) try {
             int serial_size = 12;
             int depth_size = aligned_depth.get_width()*aligned_depth.get_height()*aligned_depth.get_bytes_per_pixel();
             realsense_server_arr[device_idx].update_buffer((unsigned char*)aligned_depth.get_data(), serial_size+10*4, depth_size);
-            int color_size = data.get_color_frame().get_width()*data.get_color_frame().get_height()*data.get_color_frame().get_bytes_per_pixel();
+            int color_size = depth_and_color_frameset.get_color_frame().get_width()*depth_and_color_frameset.get_color_frame().get_height()*depth_and_color_frameset.get_color_frame().get_bytes_per_pixel();
             realsense_server_arr[device_idx].update_buffer((unsigned char*)color.get_data(), serial_size+10*4 + depth_size, color_size);
 
             // Send camera intrinsics and depth scale
@@ -412,7 +415,7 @@ int main(int argc, char * argv[]) try {
 
                 cv::Mat color_out_mat = display_transform(f, color_intrinsics_mat, src);
 
-                // Allocate new frame. Copy all missing data from f.
+                // Allocate new frame. Copy all missing depth_and_color_frameset from f.
                 // This assumes the output is same resolution and format
                 // if not true, need to specify parameters explicitly
                 auto res = src.allocate_video_frame(f.get_profile(), f);

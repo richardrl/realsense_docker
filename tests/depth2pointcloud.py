@@ -1,7 +1,7 @@
 import glob
 from pathlib import Path
 import numpy as np
-from real.camera import Camera
+from real.camera_original import Camera
 from utils.camera_util import convert_depth_to_pointcloud
 from utils import visualization_util
 import open3d
@@ -26,7 +26,7 @@ txts = [f for f in glob.glob(str(Path("../out/") / "*.txt"), recursive=True)]
 
 assert txts
 
-cameras = [Camera(port=50000 + i) for i in range(3)]
+cameras = [Camera() for i in range(1)]
 
 for txt in txts:
     if "camera_pose" in txt:
@@ -37,6 +37,10 @@ for txt in txts:
 
 for cam in cameras:
     color_img, depth_img = cam.get_data()
+    import pdb
+    pdb.set_trace()
+
+    cam.serial_number = 0
     serial_no2depth_imgs_dic[cam.serial_number] = depth_img
     serial_no2intrinsics_dic[cam.serial_number] = cam.intrinsics
     serial_no2color_imgs_dic[cam.serial_number] = color_img
@@ -48,12 +52,26 @@ colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 # merge all world frame pointclouds
 import matplotlib.pyplot as plt
 
+# fig = plt.figure()
+plt.figure(figsize = (10,10))
+
 for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
+    # if cam_idx > 0:
+    #     break
+
+    # plt.subplot(211)
+    plt.imshow(serial_no2color_imgs_dic[serial_no])
+
+    # plt.subplot(212)
+    plt.imshow(serial_no2depth_imgs_dic[serial_no],cmap='nipy_spectral_r',alpha=.5)
+
+    # plt.subplot(211)
     # plt.imshow(serial_no2color_imgs_dic[serial_no])
-    # plt.show()
-    # plt.imshow(serial_no2depth_imgs_dic[serial_no],cmap='nipy_spectral_r')
-    # plt.show()
     #
+    # plt.subplot(212)
+    # plt.imshow(serial_no2depth_imgs_dic[serial_no],cmap='nipy_spectral_r',alpha=1)
+    plt.show()
+
     np.set_printoptions(formatter={'float': "{0:0.3f}".format})
     print(f"{serial_no}")
 
@@ -75,8 +93,19 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
                                                                    colors[cam_idx],
                                                                    normalize_color=False))
     else:
+        color_ims = serial_no2color_imgs_dic[serial_no]
+        img_height, img_width, _ = color_ims.shape
+
+        uv_coords = np.mgrid[0: img_height,
+                    0: img_width].reshape(2, -1)
+
+        uv_coords[[0, 1], :] = uv_coords[[1, 0], :]
+
+        # since uv_coords has been changed to be X, Y, and color_ims is ordered Y, X, we index this way
+        reshaped_color = color_ims[uv_coords[1, :], uv_coords[0, :]]
+
         geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[p_CamScene[:, 2] < 1],
-                                                                   serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
+                                                                   reshaped_color[p_CamScene[:, 2] < 1],
                                                                    normalize_color=True))
 
 open3d.visualization.draw_geometries(geometries)

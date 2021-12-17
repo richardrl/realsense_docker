@@ -23,6 +23,7 @@ docker run -it \
     --volume="$XAUTH:$XAUTH" \
     --volume="$PWD/../:/root/realsense_docker" \
     --volume="/data/pulkitag/models/rli14/visual-pushing-grasping/:/root/vpg" \
+    --volume="/data/pulkitag/models/rli14/librealsense/:/root/librealsense" \
     --privileged \
     --runtime=nvidia \
     --net=host \
