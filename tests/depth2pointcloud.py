@@ -55,6 +55,8 @@ import matplotlib.pyplot as plt
 for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
     # if cam_idx > 0:
     #     break
+    if cam_idx == 0:
+        continue
 
     # plt.subplot(211)
     plt.figure(figsize=(10, 10))
@@ -83,7 +85,8 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
 
     # debug individual p_CamScene
     # open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(p_CamScene[p_CamScene[:, 2] < 1],
-    #                                                            serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
+    #                                                            # serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
+    #                                                                               [0, 0, 0],
     #                                                            normalize_color=True),
     #                                       open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
 
@@ -103,7 +106,7 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
         # since uv_coords has been changed to be X, Y, and color_ims is ordered Y, X, we index this way
         reshaped_color = color_ims[uv_coords[1, :], uv_coords[0, :]]
 
-        geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[p_CamScene[:, 2] < 1],
+        geometries.append(visualization_util.make_point_cloud_o3d(p_CamScene[p_CamScene[:, 2] < 1],
                                                                    reshaped_color[p_CamScene[:, 2] < 1],
                                                                    normalize_color=True))
 
