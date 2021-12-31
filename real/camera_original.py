@@ -44,8 +44,11 @@ class Camera(object):
         # Reorganize TCP data into color and depth frame
         self.intrinsics = np.fromstring(data[0:(9*4)], np.float32).reshape(3, 3)
         depth_scale = np.fromstring(data[(9*4):(10*4)], np.float32)[0]
-        depth_img = np.fromstring(data[(10*4):((10*4)+self.im_width*self.im_height*2)], np.uint16).reshape(self.im_height, self.im_width)
-        color_img = np.fromstring(data[((10*4)+self.im_width*self.im_height*2):], np.uint8).reshape(self.im_height, self.im_width, 3)
+        depth_img_size = self.im_width*self.im_height*2
+        color_img_size = self.im_width*self.im_height*3
+
+        depth_img = np.fromstring(data[(10*4):((10*4)+depth_img_size)], np.uint16).reshape(self.im_height, self.im_width)
+        color_img = np.fromstring(data[((10*4)+depth_img_size):((10*4)+depth_img_size+color_img_size)], np.uint8).reshape(self.im_height, self.im_width, 3)
         depth_img = depth_img.astype(float) * depth_scale
         return color_img, depth_img
 

@@ -255,7 +255,7 @@ int main(int argc, char * argv[]) try {
 //    Server realsense_server(50000);
 //    realsense_server.init_listener_thread();
 
-
+    int num_cameras = 4;
     // Create a simple OpenGL window for rendering:
     window app(2560, 720, "RealSense Stream");
 
@@ -270,16 +270,16 @@ int main(int argc, char * argv[]) try {
     std::vector<Server> realsense_server_arr;
 //    std::vector<window> window_arr;
 
-    for (int i=0; i<1; ++i) {
+    for (int i=0; i<num_cameras; ++i) {
         printf("Initializing server... %d\n", i);
         Server realsense_server(50000 + i);
         realsense_server_arr.emplace_back(realsense_server);
 //        realsense_server_arr.back().init_listener_thread();
         }
 
-    for (int i=0; i<1; ++i) {
+    for (int i=0; i<num_cameras; ++i) {
         realsense_server_arr[i].init_listener_thread();
-        }
+    }
 
     // Declare two textures on the GPU, one for color and one for depth
     texture depth_image, color_image;
@@ -292,23 +292,17 @@ int main(int argc, char * argv[]) try {
     std::vector<rs2::pipeline>  pipelines;
 
     // TODO: maybe use indexes here instead of query devices... might be fing things up
-//    for (auto&& dev : ctx.query_devices())
+    for (auto&& dev : devices)
     {
 //        rs2::pipeline pipe(ctx);
 //        rs2::config cfg;
 //        cfg.enable_device(dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
 
         // Configure streams
-        rs2::config config_pipe;
-        config_pipe.enable_stream(rs2_stream::RS2_STREAM_DEPTH, stream_width, stream_height, RS2_FORMAT_Z16, stream_fps);
-        config_pipe.enable_stream(rs2_stream::RS2_STREAM_COLOR, stream_width, stream_height, RS2_FORMAT_RGB8, stream_fps);
-        config_pipe.enable_device(dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
-
         rs2::pipeline pipe(ctx);
         pipelines.emplace_back(pipe);
 
 
-        pipe.start(config_pipe);
         std::cout << "Device information: " << std::endl;
         for (int i = 0; i < static_cast<int>(RS2_CAMERA_INFO_COUNT); i++) {
               rs2_camera_info info_type = static_cast<rs2_camera_info>(i);
@@ -321,26 +315,38 @@ int main(int argc, char * argv[]) try {
 
     }
 
-    for (auto&& pipe : pipelines) {
+//    for (auto&& pipe : pipelines) {
+    for (int device_idx=0; device_idx<num_cameras; ++device_idx)
+
+    {
+        rs2::pipeline pipe = pipelines[device_idx];
+        rs2::device dev = devices[device_idx];
+
+        rs2::config config_pipe;
+        config_pipe.enable_stream(rs2_stream::RS2_STREAM_DEPTH, stream_width, stream_height, RS2_FORMAT_Z16, stream_fps);
+        config_pipe.enable_stream(rs2_stream::RS2_STREAM_COLOR, stream_width, stream_height, RS2_FORMAT_RGB8, stream_fps);
+        config_pipe.enable_device(dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
+
+        pipe.start(config_pipe);
+
         // Capture 30 frames to give autoexposure, etc. a chance to settle
         for (int i = 0; i < 30; ++i) pipe.wait_for_frames();
     }
 
-    // TODO: how does this align actually take each device into account?
-    rs2::align align(rs2_stream::RS2_STREAM_COLOR);
+
     while(app) {
 //        for (auto&& dev : ctx.query_devices())
 //        for (auto&& pipe : pipelines)
 
-        for (int device_idx=0; device_idx<1; ++device_idx)
+        for (int device_idx=0; device_idx<num_cameras; ++device_idx)
         {
-//            rs2::pipeline_profile active_pipe_profile = pipe.get_active_profile();
-//            rs2::device dev = active_pipe_profile.get_device();
+            // TODO: how does this align actually take each device into account?
+            rs2::align align(rs2_stream::RS2_STREAM_COLOR);
             // Get active device sensors
 
             // TODO: is this possibly stochastic?
             // no, it can't be...
-            rs2::device dev = ctx.query_devices()[device_idx];
+            rs2::device dev = devices[device_idx];
 
             rs2::pipeline pipe = pipelines[device_idx];
 
@@ -394,9 +400,10 @@ int main(int argc, char * argv[]) try {
             realsense_server_arr[device_idx].update_buffer((unsigned char*)&depth_scale, serial_size+9*4, 4);
 
             // send serial number
+            realsense_server_arr[device_idx].update_buffer((unsigned char*) dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER), 0, serial_size);
+
 //            int dummy_serial[6] = {333, 333, 333, 333, 333, 333};
 
-            realsense_server_arr[device_idx].update_buffer((unsigned char*) dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER), 0, serial_size);
             // Render depth on to the first half of the screen and color on to the second
 //            depth_image.render(depth_colorized, { 0, 0, app.width() / 2, app.height() });
 //            color_image.render(color, { app.width() / 2, 0, app.width() / 2, app.height() });

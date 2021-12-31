@@ -72,3 +72,6 @@ target_link_libraries(realsense_multicam_headless pthread ${DEPENDENCIES} ${PROJ
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 target_link_libraries(realsense_multicam_headless ${OpenCV_LIBS})
 target_include_directories(realsense_multicam_headless PRIVATE "/realsense")
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")

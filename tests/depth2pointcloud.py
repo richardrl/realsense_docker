@@ -1,7 +1,7 @@
 import glob
 from pathlib import Path
 import numpy as np
-from real.camera_original import Camera
+from real.camera import Camera
 from utils.camera_util import convert_depth_to_pointcloud
 from utils import visualization_util
 import open3d
@@ -10,7 +10,7 @@ import open3d
 Start Config
 """
 cam_color_segment = False
-
+num_cameras = 4
 """
 End Config
 """
@@ -26,7 +26,7 @@ txts = [f for f in glob.glob(str(Path("../out/") / "*.txt"), recursive=True)]
 
 assert txts
 
-cameras = [Camera() for i in range(1)]
+cameras = [Camera(port=50000+i) for i in range(num_cameras)]
 
 for txt in txts:
     if "camera_pose" in txt:
@@ -37,10 +37,8 @@ for txt in txts:
 
 for cam in cameras:
     color_img, depth_img = cam.get_data()
-    import pdb
-    pdb.set_trace()
 
-    cam.serial_number = 0
+    # cam.serial_number = 0
     serial_no2depth_imgs_dic[cam.serial_number] = depth_img
     serial_no2intrinsics_dic[cam.serial_number] = cam.intrinsics
     serial_no2color_imgs_dic[cam.serial_number] = color_img
@@ -53,13 +51,14 @@ colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 import matplotlib.pyplot as plt
 
 # fig = plt.figure()
-plt.figure(figsize = (10,10))
 
 for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
     # if cam_idx > 0:
     #     break
 
     # plt.subplot(211)
+    plt.figure(figsize=(10, 10))
+
     plt.imshow(serial_no2color_imgs_dic[serial_no])
 
     # plt.subplot(212)

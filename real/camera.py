@@ -13,11 +13,11 @@ class Camera(object):
     def __init__(self, port=50000):
 
         # Data options (change me)
-        # self.im_height = 720
-        # self.im_width = 1280
+        self.im_height = 720
+        self.im_width = 1280
 
-        self.im_height = 480
-        self.im_width = 640
+        # self.im_height = 480
+        # self.im_width = 640
 
         self.tcp_host_ip = '127.0.0.1'
         self.tcp_port = port
@@ -58,9 +58,11 @@ class Camera(object):
 
         # this can't be right...
         depth_img_size = self.im_width*self.im_height*2
+        color_img_size = self.im_width*self.im_height*3
+
         depth_img = np.fromstring(data[serial_size+(10*4):serial_size+((10*4)+depth_img_size)], np.uint16).reshape(self.im_height, self.im_width)
 
-        color_img = np.fromstring(data[serial_size+((10*4)+depth_img_size):], np.uint8).reshape(self.im_height, self.im_width, 3)
+        color_img = np.fromstring(data[serial_size+((10*4)+depth_img_size):serial_size+((10*4)+depth_img_size)+color_img_size], np.uint8).reshape(self.im_height, self.im_width, 3)
 
         # depth_img = depth_img.astype(float) * depth_scale
 
