@@ -11,6 +11,13 @@ Start Config
 """
 cam_color_segment = False
 num_cameras = 4
+filter_height = -.125
+filter_workspace = True
+
+# todo: make workspace limits as a cube
+# todo: cropout points belonging to arm using urdf
+# can do the above by loading urdf into pybullet, then using point checks... a lot of work mb
+
 """
 End Config
 """
@@ -100,8 +107,11 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
         # since uv_coords has been changed to be X, Y, and color_ims is ordered Y, X, we index this way
         reshaped_color = color_ims[uv_coords[1, :], uv_coords[0, :]]
 
-        geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[p_CamScene[:, 2] < 1],
-                                                                   reshaped_color[p_CamScene[:, 2] < 1],
+        # filter by world scene height
+        # and filter by camscene depth
+
+        geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[np.logical_and(p_CamScene[:, 2] < 1, p_WorldScene[:, 2] > filter_height)],
+                                                                   reshaped_color[np.logical_and(p_CamScene[:, 2] < 1, p_WorldScene[:, 2] > filter_height)],
                                                                    normalize_color=True))
 
 open3d.visualization.draw_geometries(geometries)
