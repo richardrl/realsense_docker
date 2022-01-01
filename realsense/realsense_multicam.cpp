@@ -346,7 +346,6 @@ int main(int argc, char * argv[]) try {
 
             // TODO: is this possibly stochastic?
             // no, it can't be...
-            rs2::device dev = devices[device_idx];
 
             rs2::pipeline pipe = pipelines[device_idx];
 
@@ -360,7 +359,7 @@ int main(int argc, char * argv[]) try {
 
 
 
-            std::vector<rs2::sensor> sensors = dev.query_sensors();
+            std::vector<rs2::sensor> sensors = devices[device_idx].query_sensors();
             rs2::sensor depth_sensor = sensors[0];
             rs2::sensor color_sensor = sensors[1];
 
@@ -400,7 +399,7 @@ int main(int argc, char * argv[]) try {
             realsense_server_arr[device_idx].update_buffer((unsigned char*)&depth_scale, serial_size+9*4, 4);
 
             // send serial number
-            realsense_server_arr[device_idx].update_buffer((unsigned char*) dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER), 0, serial_size);
+            realsense_server_arr[device_idx].update_buffer((unsigned char*) devices[device_idx].get_info(RS2_CAMERA_INFO_SERIAL_NUMBER), 0, serial_size);
 
 //            int dummy_serial[6] = {333, 333, 333, 333, 333, 333};
 

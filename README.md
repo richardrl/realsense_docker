@@ -1,3 +1,27 @@
+# Usage
+## Calibration
+- cd realsense
+- Run realsense multicam in background
+
+```
+./realsense_multicam &
+```
+
+- Collect data
+
+```
+python3 calibrate.py
+```
+
+- Calculate poses
+
+```
+python3 calculate_poses_from_data_files.py
+```
+
+## Visualize combined pointcloud from all cameras
+- python3 depth2pointcloud.py
+
 # Unique features
 - Supports multiple cameras visualization and multiple TCP server streaming in realsense.cpp
 - Replaced the chessboard in calibration.py with a Charuco board

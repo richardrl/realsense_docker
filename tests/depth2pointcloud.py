@@ -106,7 +106,7 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
         # since uv_coords has been changed to be X, Y, and color_ims is ordered Y, X, we index this way
         reshaped_color = color_ims[uv_coords[1, :], uv_coords[0, :]]
 
-        geometries.append(visualization_util.make_point_cloud_o3d(p_CamScene[p_CamScene[:, 2] < 1],
+        geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[p_CamScene[:, 2] < 1],
                                                                    reshaped_color[p_CamScene[:, 2] < 1],
                                                                    normalize_color=True))
 
