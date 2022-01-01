@@ -58,20 +58,14 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
     if cam_idx == 0:
         continue
 
-    # plt.subplot(211)
-    plt.figure(figsize=(10, 10))
-
-    plt.imshow(serial_no2color_imgs_dic[serial_no])
-
-    # plt.subplot(212)
-    plt.imshow(serial_no2depth_imgs_dic[serial_no],cmap='nipy_spectral_r',alpha=.5)
-
-    # plt.subplot(211)
+    # debugging alignment
+    # plt.figure(figsize=(10, 10))
+    #
     # plt.imshow(serial_no2color_imgs_dic[serial_no])
     #
-    # plt.subplot(212)
-    # plt.imshow(serial_no2depth_imgs_dic[serial_no],cmap='nipy_spectral_r',alpha=1)
-    plt.show()
+    # plt.imshow(serial_no2depth_imgs_dic[serial_no],cmap='nipy_spectral_r',alpha=.5)
+    #
+    # plt.show()
 
     np.set_printoptions(formatter={'float': "{0:0.3f}".format})
     print(f"{serial_no}")

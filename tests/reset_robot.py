@@ -13,4 +13,7 @@ SLEEP_TIME = 1
 traj_style = "ellipse"
 robot = Robot(False, None, None, workspace_limits,
               tcp_host_ip, tcp_port, rtc_host_ip, rtc_port,
-              False, None, None, num_cameras=3)
+              False, None, None, num_cameras=0)
+
+import pdb
+pdb.set_trace()

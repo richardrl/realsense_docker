@@ -347,10 +347,10 @@ int main(int argc, char * argv[]) try {
             // TODO: is this possibly stochastic?
             // no, it can't be...
 
-            rs2::pipeline pipe = pipelines[device_idx];
+//            rs2::pipeline pipe = pipelines[device_idx];
 
             // get intrinsics
-            rs2::pipeline_profile active_pipe_profile = pipe.get_active_profile();
+            rs2::pipeline_profile active_pipe_profile = pipelines[device_idx].get_active_profile();
             rs2::video_stream_profile color_stream_profile = active_pipe_profile.get_stream(rs2_stream::RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
             rs2_intrinsics color_intrinsics = color_stream_profile.get_intrinsics();
             float color_intrinsics_arr[9] = {color_intrinsics.fx, 0.0f, color_intrinsics.ppx,
@@ -368,7 +368,7 @@ int main(int argc, char * argv[]) try {
 
 
             // Wait for next set of frames from the camera
-            rs2::frameset depth_and_color_frameset = pipe.wait_for_frames();
+            rs2::frameset depth_and_color_frameset = pipelines[device_idx].wait_for_frames();
 
 //            rs2::frame color = depth_and_color_frameset.get_color_frame();
 //            rs2::depth_frame aligned_depth = depth_and_color_frameset.get_depth_frame();
