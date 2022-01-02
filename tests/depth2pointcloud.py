@@ -14,6 +14,8 @@ num_cameras = 4
 filter_height = -.125
 filter_workspace = True
 
+# workspace limits in world frame
+workspace_limits = np.asarray([[0.6384-.25, 0.6384+.25], [.1325-.25, .1325+.25], [-.125, -.125+.2]])
 # todo: make workspace limits as a cube
 # todo: cropout points belonging to arm using urdf
 # can do the above by loading urdf into pybullet, then using point checks... a lot of work mb
@@ -110,8 +112,26 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
         # filter by world scene height
         # and filter by camscene depth
 
-        geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[np.logical_and(p_CamScene[:, 2] < 1, p_WorldScene[:, 2] > filter_height)],
-                                                                   reshaped_color[np.logical_and(p_CamScene[:, 2] < 1, p_WorldScene[:, 2] > filter_height)],
+        geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[(p_CamScene[:, 2] < 1) *
+                                                                               (p_WorldScene[:, 0] > workspace_limits[0][0]) *
+                                                                               (p_WorldScene[:, 0] < workspace_limits[0][1]) *
+                                                                               (p_WorldScene[:, 1] > workspace_limits[1][0]) *
+                                                                               (p_WorldScene[:, 1] < workspace_limits[1][1]) *
+                                                                               (p_WorldScene[:, 2] > workspace_limits[2][0]) *
+                                                                               (p_WorldScene[:, 2] < workspace_limits[2][1])],
+                                                                   reshaped_color[(p_CamScene[:, 2] < 1) *
+                                                                                  (p_WorldScene[:, 0] >
+                                                                                   workspace_limits[0][0]) *
+                                                                                  (p_WorldScene[:, 0] <
+                                                                                   workspace_limits[0][1]) *
+                                                                                  (p_WorldScene[:, 1] >
+                                                                                   workspace_limits[1][0]) *
+                                                                                  (p_WorldScene[:, 1] <
+                                                                                   workspace_limits[1][1]) *
+                                                                                  (p_WorldScene[:, 2] >
+                                                                                   workspace_limits[2][0]) *
+                                                                                  (p_WorldScene[:, 2] <
+                                                                                   workspace_limits[2][1])],
                                                                    normalize_color=True))
 
 open3d.visualization.draw_geometries(geometries)

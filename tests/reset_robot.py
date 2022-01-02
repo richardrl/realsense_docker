@@ -14,6 +14,6 @@ traj_style = "ellipse"
 robot = Robot(False, None, None, workspace_limits,
               tcp_host_ip, tcp_port, rtc_host_ip, rtc_port,
               False, None, None, num_cameras=0)
-
+print(robot.get_tcp_pose())
 import pdb
 pdb.set_trace()
