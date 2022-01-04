@@ -61,11 +61,10 @@ import matplotlib.pyplot as plt
 
 # fig = plt.figure()
 
+aggregate_pc_lst = []
 for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
-    # if cam_idx > 0:
-    #     break
-    if cam_idx == 0:
-        continue
+    # if cam_idx != 3:
+    #     continue
 
     # debugging alignment
     # plt.figure(figsize=(10, 10))
@@ -86,6 +85,7 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
                                                serial_no2extrinsics_dic[serial_no],
                                                serial_no2intrinsics_dic[serial_no])
 
+    aggregate_pc_lst.append(p_WorldScene)
     # debug individual p_CamScene
     # open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(p_CamScene[p_CamScene[:, 2] < 1],
     #                                                            # serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
@@ -134,4 +134,7 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
                                                                                    workspace_limits[2][1])],
                                                                    normalize_color=True))
 
+aggregate_pc = np.concatenate(aggregate_pc_lst)
+import torch
+torch.save(aggregate_pc, "../out/aggregate_pc.torch")
 open3d.visualization.draw_geometries(geometries)
