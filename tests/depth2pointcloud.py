@@ -5,12 +5,13 @@
 import glob
 from pathlib import Path
 import numpy as np
-from real.camera import Camera
+from camera import Camera
 from utils.camera_util import convert_depth_to_pointcloud
 from utils import visualization_util
 import open3d
 import datetime
 import sys
+import torch
 
 """
 Start Config
@@ -21,7 +22,7 @@ filter_height = -.125
 filter_workspace = True
 
 # workspace limits in world frame
-workspace_limits = np.asarray([[0.6384-.25, 0.6384+.25], [.1325-.25, .1325+.25], [-.125, -.125+.2]])
+workspace_limits = np.asarray([[0.6384-.25, 0.6384+.25], [.1325-.35, .1325+.35], [-.125, -.125+.2]])
 # todo: make workspace limits as a cube
 # todo: cropout points belonging to arm using urdf
 # can do the above by loading urdf into pybullet, then using point checks... a lot of work mb
@@ -70,6 +71,7 @@ import matplotlib.pyplot as plt
 # fig = plt.figure()
 
 aggregate_pc_lst = []
+aggregate_rgb_lst = []
 for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
     # if cam_idx != 3:
     #     continue
@@ -126,37 +128,44 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
                                                                                (p_WorldScene[:, 1] < workspace_limits[1][1]) *
                                                                                (p_WorldScene[:, 2] > workspace_limits[2][0]) *
                                                                                (p_WorldScene[:, 2] < workspace_limits[2][1])]
-
+        rgb_cropped = reshaped_color[(p_CamScene[:, 2] < 1) *
+                                                                                  (p_WorldScene[:, 0] >
+                                                                                   workspace_limits[0][0]) *
+                                                                                  (p_WorldScene[:, 0] <
+                                                                                   workspace_limits[0][1]) *
+                                                                                  (p_WorldScene[:, 1] >
+                                                                                   workspace_limits[1][0]) *
+                                                                                  (p_WorldScene[:, 1] <
+                                                                                   workspace_limits[1][1]) *
+                                                                                  (p_WorldScene[:, 2] >
+                                                                                   workspace_limits[2][0]) *
+                                                                                  (p_WorldScene[:, 2] <
+                                                                                   workspace_limits[2][1])]
         aggregate_pc_lst.append(p_WorldScene_cropped)
-
+        aggregate_rgb_lst.append(rgb_cropped)
         # geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene_cropped,
-        #                                                            reshaped_color[(p_CamScene[:, 2] < 1) *
-        #                                                                           (p_WorldScene[:, 0] >
-        #                                                                            workspace_limits[0][0]) *
-        #                                                                           (p_WorldScene[:, 0] <
-        #                                                                            workspace_limits[0][1]) *
-        #                                                                           (p_WorldScene[:, 1] >
-        #                                                                            workspace_limits[1][0]) *
-        #                                                                           (p_WorldScene[:, 1] <
-        #                                                                            workspace_limits[1][1]) *
-        #                                                                           (p_WorldScene[:, 2] >
-        #                                                                            workspace_limits[2][0]) *
-        #                                                                           (p_WorldScene[:, 2] <
-        #                                                                            workspace_limits[2][1])],
+        #                                                            rgb_cropped,
         #                                                            normalize_color=True))
 
 aggregate_pc = np.concatenate(aggregate_pc_lst)
+aggregate_rgb = np.concatenate(aggregate_rgb_lst)
 
 aggregate_pcd = visualization_util.make_point_cloud_o3d(aggregate_pc,
-                                        [0, 0, 0])
+                                        aggregate_rgb,
+                                                        normalize_color=True)
 
 # remove noise
 aggregate_pcd, idxs = aggregate_pcd.remove_radius_outlier(nb_points=16, radius=0.05)
 
-aggregate_pc = aggregate_pcd.points
-import torch
+# aggregate_pc = np.array(aggregate_pcd.points)
 
 d = datetime.datetime.now()
 filename = f"{d:%m-%d-%Y_%H:%M:%S}_{object_name}.torch".format(d=d, object_name=object_name)
-torch.save(aggregate_pc, f"../out/samples/{filename}")
-open3d.visualization.draw_geometries([aggregate_pcd])
+
+save_dic = dict(points=np.array(aggregate_pcd.points),
+                colors=np.array(aggregate_pcd.colors),
+                object_name=object_name)
+
+torch.save(save_dic, f"../out/samples/{filename}")
+open3d.visualization.draw_geometries([aggregate_pcd,
+                                      open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
