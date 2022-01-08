@@ -91,7 +91,7 @@ RUN apt-get install -y gdb
 
 # install opencv and contrib packages
 # https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html
-WORKDIR /root/opencv
+WORKDIR /home/docker/opencv
 RUN apt update && apt install -y cmake g++ wget unzip
 RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/master.zip
 RUN wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/master.zip
@@ -105,6 +105,18 @@ RUN cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-master/modules ../opencv
 RUN cmake --build .
 
 RUN pip3 install open3d
+
+
+# use gosu to switch from root to host user ID so we don't run into permissions issues
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y gosu; \
+	rm -rf /var/lib/apt/lists/*; \
+# verify that the binary works
+	gosu nobody true
+# end gosu magic
+
+
 # this is needed for the headers...
 #RUN apt-get install -y libopencv-core-dev
 COPY ./entrypoint.sh /

@@ -21,13 +21,14 @@ docker run -it \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
     --env="XAUTHORITY=$XAUTH" \
     --volume="$XAUTH:$XAUTH" \
-    --volume="$PWD/../:/root/realsense_docker" \
-    --volume="/data/pulkitag/models/rli14/visual-pushing-grasping/:/root/vpg" \
-    --volume="/data/pulkitag/models/rli14/librealsense/:/root/librealsense" \
+    --volume="$PWD/../:/home/docker/realsense_docker" \
+    --volume="/data/pulkitag/models/rli14/visual-pushing-grasping/:/home/docker/vpg" \
+    --volume="/data/pulkitag/models/rli14/librealsense/:/home/docker/librealsense" \
     --privileged \
     --runtime=nvidia \
     --net=host \
     -e WANDB_API_KEY \
     -e UR5_IP \
+    -e uid=$(id -u)\
     ${IMAGE} \
     bash

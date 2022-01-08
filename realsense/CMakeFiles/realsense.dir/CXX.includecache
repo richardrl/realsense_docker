@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/root/realsense_docker/realsense/example.hpp
+/home/docker/realsense_docker/realsense/example.hpp
 GLFW/glfw3.h
 -
 string
@@ -16,15 +16,15 @@ sstream
 iostream
 -
 stb_easy_font.h
-/root/realsense_docker/realsense/stb_easy_font.h
+/home/docker/realsense_docker/realsense/stb_easy_font.h
 
-/root/realsense_docker/realsense/realsense.cpp
+/home/docker/realsense_docker/realsense/realsense.cpp
 librealsense2/rs.hpp
 -
 librealsense2/rs_advanced_mode.hpp
 -
 example.hpp
-/root/realsense_docker/realsense/example.hpp
+/home/docker/realsense_docker/realsense/example.hpp
 signal.h
 -
 iomanip
@@ -46,7 +46,7 @@ stdlib.h
 iostream
 -
 
-/root/realsense_docker/realsense/stb_easy_font.h
+/home/docker/realsense_docker/realsense/stb_easy_font.h
 stdlib.h
 -
 math.h

@@ -25,7 +25,7 @@ python3 calculate_poses_from_data_files.py
 # Unique features
 - Supports multiple cameras visualization and multiple TCP server streaming in realsense.cpp
 - Replaced the chessboard in calibration.py with a Charuco board
-- Does Charuco board frame detection and visualization in realsense.cpp
+- Charuco board frame detection and visualization in realsense.cpp
 - Refactored calibration.py with Spatial Algebra syntax so that it is very clear what transforms are happening
 
 # Docker notes

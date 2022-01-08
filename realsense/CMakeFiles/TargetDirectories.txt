@@ -1,5 +1,5 @@
-/root/realsense_docker/realsense/CMakeFiles/edit_cache.dir
-/root/realsense_docker/realsense/CMakeFiles/realsense_multicam_headless.dir
-/root/realsense_docker/realsense/CMakeFiles/realsense.dir
-/root/realsense_docker/realsense/CMakeFiles/rebuild_cache.dir
-/root/realsense_docker/realsense/CMakeFiles/realsense_multicam.dir
+/home/docker/realsense_docker/realsense/CMakeFiles/edit_cache.dir
+/home/docker/realsense_docker/realsense/CMakeFiles/realsense_multicam_headless.dir
+/home/docker/realsense_docker/realsense/CMakeFiles/realsense.dir
+/home/docker/realsense_docker/realsense/CMakeFiles/rebuild_cache.dir
+/home/docker/realsense_docker/realsense/CMakeFiles/realsense_multicam.dir

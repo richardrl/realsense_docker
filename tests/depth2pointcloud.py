@@ -1,3 +1,7 @@
+# creates object pointcloud from multiple cameras
+# saves pointcloud to disk
+# NOTE: assumes single object on table
+
 import glob
 from pathlib import Path
 import numpy as np
@@ -5,6 +9,8 @@ from real.camera import Camera
 from utils.camera_util import convert_depth_to_pointcloud
 from utils import visualization_util
 import open3d
+import datetime
+import sys
 
 """
 Start Config
@@ -23,6 +29,8 @@ workspace_limits = np.asarray([[0.6384-.25, 0.6384+.25], [.1325-.25, .1325+.25],
 """
 End Config
 """
+
+object_name = sys.argv[1]
 
 # load extrinsics
 
@@ -85,7 +93,6 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
                                                serial_no2extrinsics_dic[serial_no],
                                                serial_no2intrinsics_dic[serial_no])
 
-    aggregate_pc_lst.append(p_WorldScene)
     # debug individual p_CamScene
     # open3d.visualization.draw_geometries([visualization_util.make_point_cloud_o3d(p_CamScene[p_CamScene[:, 2] < 1],
     #                                                            # serial_no2color_imgs_dic[serial_no].reshape(-1, 3)[p_CamScene[:, 2] < 1],
@@ -112,29 +119,44 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
         # filter by world scene height
         # and filter by camscene depth
 
-        geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene[(p_CamScene[:, 2] < 1) *
+        p_WorldScene_cropped = p_WorldScene[(p_CamScene[:, 2] < 1) *
                                                                                (p_WorldScene[:, 0] > workspace_limits[0][0]) *
                                                                                (p_WorldScene[:, 0] < workspace_limits[0][1]) *
                                                                                (p_WorldScene[:, 1] > workspace_limits[1][0]) *
                                                                                (p_WorldScene[:, 1] < workspace_limits[1][1]) *
                                                                                (p_WorldScene[:, 2] > workspace_limits[2][0]) *
-                                                                               (p_WorldScene[:, 2] < workspace_limits[2][1])],
-                                                                   reshaped_color[(p_CamScene[:, 2] < 1) *
-                                                                                  (p_WorldScene[:, 0] >
-                                                                                   workspace_limits[0][0]) *
-                                                                                  (p_WorldScene[:, 0] <
-                                                                                   workspace_limits[0][1]) *
-                                                                                  (p_WorldScene[:, 1] >
-                                                                                   workspace_limits[1][0]) *
-                                                                                  (p_WorldScene[:, 1] <
-                                                                                   workspace_limits[1][1]) *
-                                                                                  (p_WorldScene[:, 2] >
-                                                                                   workspace_limits[2][0]) *
-                                                                                  (p_WorldScene[:, 2] <
-                                                                                   workspace_limits[2][1])],
-                                                                   normalize_color=True))
+                                                                               (p_WorldScene[:, 2] < workspace_limits[2][1])]
+
+        aggregate_pc_lst.append(p_WorldScene_cropped)
+
+        # geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene_cropped,
+        #                                                            reshaped_color[(p_CamScene[:, 2] < 1) *
+        #                                                                           (p_WorldScene[:, 0] >
+        #                                                                            workspace_limits[0][0]) *
+        #                                                                           (p_WorldScene[:, 0] <
+        #                                                                            workspace_limits[0][1]) *
+        #                                                                           (p_WorldScene[:, 1] >
+        #                                                                            workspace_limits[1][0]) *
+        #                                                                           (p_WorldScene[:, 1] <
+        #                                                                            workspace_limits[1][1]) *
+        #                                                                           (p_WorldScene[:, 2] >
+        #                                                                            workspace_limits[2][0]) *
+        #                                                                           (p_WorldScene[:, 2] <
+        #                                                                            workspace_limits[2][1])],
+        #                                                            normalize_color=True))
 
 aggregate_pc = np.concatenate(aggregate_pc_lst)
+
+aggregate_pcd = visualization_util.make_point_cloud_o3d(aggregate_pc,
+                                        [0, 0, 0])
+
+# remove noise
+aggregate_pcd, idxs = aggregate_pcd.remove_radius_outlier(nb_points=16, radius=0.05)
+
+aggregate_pc = aggregate_pcd.points
 import torch
-torch.save(aggregate_pc, "../out/aggregate_pc.torch")
-open3d.visualization.draw_geometries(geometries)
+
+d = datetime.datetime.now()
+filename = f"{d:%m-%d-%Y_%H:%M:%S}_{object_name}.torch".format(d=d, object_name=object_name)
+torch.save(aggregate_pc, f"../out/samples/{filename}")
+open3d.visualization.draw_geometries([aggregate_pcd])
