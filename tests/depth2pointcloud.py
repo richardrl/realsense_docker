@@ -155,7 +155,7 @@ aggregate_pcd = visualization_util.make_point_cloud_o3d(aggregate_pc,
                                                         normalize_color=True)
 
 # remove noise
-aggregate_pcd, idxs = aggregate_pcd.remove_radius_outlier(nb_points=16, radius=0.05)
+aggregate_pcd, idxs = aggregate_pcd.remove_radius_outlier(nb_points=50, radius=0.01)
 
 # aggregate_pc = np.array(aggregate_pcd.points)
 
@@ -166,6 +166,21 @@ save_dic = dict(points=np.array(aggregate_pcd.points),
                 colors=np.array(aggregate_pcd.colors),
                 object_name=object_name)
 
-torch.save(save_dic, f"../out/samples/{filename}")
+
+box = open3d.geometry.TriangleMesh.create_box(width=workspace_limits[0][1]-workspace_limits[0][0],
+                                              height=workspace_limits[1][1]-workspace_limits[1][0],
+                                              depth=.003)
+box.paint_uniform_color([0, 0, 1])
+
+box.translate(-box.get_center())
+
+box.translate([(workspace_limits[0][0] + workspace_limits[0][1])/2,
+               (workspace_limits[1][0] + workspace_limits[1][1])/2,
+               workspace_limits[2][0]])
+
+print(np.array(aggregate_pcd.points).mean(axis=0))
 open3d.visualization.draw_geometries([aggregate_pcd,
-                                      open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0])])
+                                      open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0]),
+                                      box])
+
+torch.save(save_dic, f"../out/samples/{filename}")
