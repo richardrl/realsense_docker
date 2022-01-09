@@ -1,3 +1,10 @@
+# Unique features
+- Supports multiple cameras visualization and multiple TCP server streaming in realsense.cpp
+- Replaced the chessboard in calibration.py with a Charuco board
+- Charuco board frame detection and visualization in realsense.cpp
+- Refactored calibration.py with Spatial Algebra syntax so that it is very clear what transforms are happening
+
+
 # Usage
 ## Calibration
 - cd realsense
@@ -21,12 +28,6 @@ python3 calculate_poses_from_data_files.py
 
 ## Visualize combined pointcloud from all cameras
 - python3 depth2pointcloud.py
-
-# Unique features
-- Supports multiple cameras visualization and multiple TCP server streaming in realsense.cpp
-- Replaced the chessboard in calibration.py with a Charuco board
-- Charuco board frame detection and visualization in realsense.cpp
-- Refactored calibration.py with Spatial Algebra syntax so that it is very clear what transforms are happening
 
 # Docker notes
 realsense_docker.dockerfile
@@ -58,6 +59,9 @@ checkerboard_offset_from_tool is the translation of the Charuco board corner poi
 
 # Pinhole camera model
 ![pinhole](images/pinhole.png)
+
+# UR5e frames
+![ur5_frames](images/ur5_frames.png)
 
 # Notes
 - Opencv does the axis as bgr instead of rgb
