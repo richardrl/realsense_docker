@@ -1,7 +1,6 @@
-# Unique features
-- Supports multiple cameras visualization and multiple TCP server streaming in realsense.cpp
-- Replaced the chessboard in calibration.py with a Charuco board
-- Charuco board frame detection and visualization in realsense.cpp
+# Unique features compared to original realsense.cpp
+- Supports multiple cameras visualization and multiple TCP server streaming
+- Charuco board frame detection and visualization
 - Refactored calibration.py with Spatial Algebra syntax so that it is very clear what transforms are happening
 
 
@@ -67,3 +66,6 @@ checkerboard_offset_from_tool is the translation of the Charuco board corner poi
 - Opencv does the axis as bgr instead of rgb
 - Use ptype to get type of variable in GDB https://stackoverflow.com/questions/9568201/gdb-show-typeinfo-of-some-data
 - gdb realsense_multicam
+
+# Credits
+- https://github.com/andyzeng/visual-pushing-grasping
