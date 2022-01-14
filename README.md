@@ -1,5 +1,6 @@
 # Unique features compared to original realsense.cpp
-- Supports multiple cameras visualization and multiple TCP server streaming
+- Multiple cameras GUI visualization
+- Stream each camera on different ports
 - Charuco board frame detection and visualization
 - Refactored calibration.py with Spatial Algebra syntax so that it is very clear what transforms are happening
 
