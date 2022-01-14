@@ -42,9 +42,7 @@ realsense_docker.dockerfile
 
 realsense_docker_from_source.dockerfile
 - You need to build from source to get the #include/realsense/rs.hpp working
-- OR figure out how to include that directory
-- You need to run andy's realsense.cpp to setup the tcp connection
-- https://dev.intelrealsense.com/docs/open-source-ethernet-networking-for-intel-realsense-depth-cameras
+- OR figure out how to include that directory with the binaries
 
 
 # Camera Calibration Settings
@@ -70,3 +68,4 @@ checkerboard_offset_from_tool is the translation of the Charuco board corner poi
 
 # Credits
 - https://github.com/andyzeng/visual-pushing-grasping
+- https://dev.intelrealsense.com/docs/open-source-ethernet-networking-for-intel-realsense-depth-cameras
