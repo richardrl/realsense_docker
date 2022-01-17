@@ -1,5 +1,5 @@
-# Unique features compared to original realsense.cpp
-- Multiple cameras GUI visualization
+# Unique features
+- Multiple cameras GUI visualization, written in cpp for speed
 - Stream each camera on different ports
 - Charuco board frame detection and visualization
 - Refactored calibration.py with Spatial Algebra syntax so that it is very clear what transforms are happening
