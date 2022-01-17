@@ -1,5 +1,5 @@
 # Unique features
-- Multiple cameras GUI visualization, written in cpp for speed
+- Multiple cameras GUI visualization, written in C++ for real-time viewing/speed
 - Stream each camera on different ports
 - Charuco board frame detection and visualization
 - Refactored calibration.py with Spatial Algebra syntax so that it is very clear what transforms are happening
