@@ -334,6 +334,18 @@ int main(int argc, char * argv[]) try {
     }
 
 
+    // depth to disparity
+    // spatial filter
+    // temporal filter
+    // disparity to depth
+    rs2::disparity_transform depth_to_disparity(true);
+//    rs2_processing_block* spatial_filter = rs2_create_spatial_filter_block(NULL);
+//    rs2_processing_block* temporal_filter = rs2_create_temporal_filter_block(NULL);
+    rs2::spatial_filter spatial_filter;
+    rs2::temporal_filter temporal_filter;
+    rs2::disparity_transform disparity_to_depth(false);
+
+
     while(app) {
 //        for (auto&& dev : ctx.query_devices())
 //        for (auto&& pipe : pipelines)
@@ -361,6 +373,10 @@ int main(int argc, char * argv[]) try {
 
             std::vector<rs2::sensor> sensors = devices[device_idx].query_sensors();
             rs2::sensor depth_sensor = sensors[0];
+
+            depth_sensor.set_option(rs2_option::RS2_OPTION_VISUAL_PRESET,
+            rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_HIGH_ACCURACY);
+
             rs2::sensor color_sensor = sensors[1];
 
 
@@ -380,6 +396,13 @@ int main(int argc, char * argv[]) try {
 
             // Find and colorize the depth depth_and_color_frameset
             rs2::frame depth_colorized = aligned_depth.apply_filter(color_map);
+
+            rs2::frame filtered = depth_colorized;
+            // Apply all the filters from realsense-viewer
+            filtered = depth_to_disparity.process(depth_colorized);
+            filtered = spatial_filter.process(filtered);
+            filtered = temporal_filter.process(filtered);
+            depth_colorized = disparity_to_depth.process(filtered);
 
             // Structure
             // First 12 chars are serial number

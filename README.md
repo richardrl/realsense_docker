@@ -1,5 +1,6 @@
-# Unique features compared to original realsense.cpp
+# Unique features of realsense_multicam.cpp compared to original realsense.cpp
 - Supports multiple cameras visualization and multiple TCP server streaming
+- Sends serial number of camera to TCP server
 - Charuco board frame detection and visualization
 - Refactored calibration.py with Spatial Algebra syntax so that it is very clear what transforms are happening
 
@@ -43,7 +44,6 @@ realsense_docker_from_source.dockerfile
 - You need to build from source to get the #include/realsense/rs.hpp working
 - OR figure out how to include that directory
 - You need to run andy's realsense.cpp to setup the tcp connection
-- https://dev.intelrealsense.com/docs/open-source-ethernet-networking-for-intel-realsense-depth-cameras
 
 
 # Camera Calibration Settings
@@ -69,3 +69,4 @@ checkerboard_offset_from_tool is the translation of the Charuco board corner poi
 
 # Credits
 - https://github.com/andyzeng/visual-pushing-grasping
+- https://dev.intelrealsense.com/docs/open-source-ethernet-networking-for-intel-realsense-depth-cameras

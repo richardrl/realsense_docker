@@ -116,6 +116,9 @@ RUN set -eux; \
 	gosu nobody true
 # end gosu magic
 
+#ENV PYTHONPATH=/home/docker/realsense_docker
+#
+#ENV OpenCV_DIR=/home/docker/opencv/build
 
 # this is needed for the headers...
 #RUN apt-get install -y libopencv-core-dev

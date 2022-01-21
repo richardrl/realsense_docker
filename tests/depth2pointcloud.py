@@ -12,6 +12,7 @@ import open3d
 import datetime
 import sys
 import torch
+from scipy.spatial.transform import Rotation as R
 
 """
 Start Config
@@ -21,8 +22,10 @@ num_cameras = 4
 filter_height = -.125
 filter_workspace = True
 
+table_rotation_x = .05
+
 # workspace limits in world frame
-workspace_limits = np.asarray([[0.6384-.25, 0.6384+.25], [.1325-.35, .1325+.35], [-.125, -.125+.2]])
+workspace_limits = np.asarray([[0.6384-.25, 0.6384+.25], [.1325-.35, .1325+.35], [filter_height, filter_height+.2]])
 # todo: make workspace limits as a cube
 # todo: cropout points belonging to arm using urdf
 # can do the above by loading urdf into pybullet, then using point checks... a lot of work mb
@@ -31,7 +34,10 @@ workspace_limits = np.asarray([[0.6384-.25, 0.6384+.25], [.1325-.35, .1325+.35],
 End Config
 """
 
-object_name = sys.argv[1]
+if len(sys.argv) == 1:
+    object_name = None
+else:
+    object_name = sys.argv[1]
 
 # load extrinsics
 
@@ -62,7 +68,7 @@ for cam in cameras:
     serial_no2color_imgs_dic[cam.serial_number] = color_img
 
 geometries = []
-colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 0]]
 
 # convert depth to camera frame pointcloud
 # merge all world frame pointclouds
@@ -125,9 +131,9 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
                                                                                (p_WorldScene[:, 0] > workspace_limits[0][0]) *
                                                                                (p_WorldScene[:, 0] < workspace_limits[0][1]) *
                                                                                (p_WorldScene[:, 1] > workspace_limits[1][0]) *
-                                                                               (p_WorldScene[:, 1] < workspace_limits[1][1]) *
-                                                                               (p_WorldScene[:, 2] > workspace_limits[2][0]) *
-                                                                               (p_WorldScene[:, 2] < workspace_limits[2][1])]
+                                                                               (p_WorldScene[:, 1] < workspace_limits[1][1])]
+                                                                               # (p_WorldScene[:, 2] > workspace_limits[2][0]) *
+                                                                               # (p_WorldScene[:, 2] < workspace_limits[2][1])]
         rgb_cropped = reshaped_color[(p_CamScene[:, 2] < 1) *
                                                                                   (p_WorldScene[:, 0] >
                                                                                    workspace_limits[0][0]) *
@@ -136,11 +142,11 @@ for cam_idx, serial_no in enumerate(serial_no2depth_imgs_dic.keys()):
                                                                                   (p_WorldScene[:, 1] >
                                                                                    workspace_limits[1][0]) *
                                                                                   (p_WorldScene[:, 1] <
-                                                                                   workspace_limits[1][1]) *
-                                                                                  (p_WorldScene[:, 2] >
-                                                                                   workspace_limits[2][0]) *
-                                                                                  (p_WorldScene[:, 2] <
-                                                                                   workspace_limits[2][1])]
+                                                                                   workspace_limits[1][1])]
+                                                                                  # (p_WorldScene[:, 2] >
+                                                                                  #  workspace_limits[2][0]) *
+                                                                                  # (p_WorldScene[:, 2] <
+                                                                                  #  workspace_limits[2][1])]
         aggregate_pc_lst.append(p_WorldScene_cropped)
         aggregate_rgb_lst.append(rgb_cropped)
         # geometries.append(visualization_util.make_point_cloud_o3d(p_WorldScene_cropped,
@@ -154,33 +160,52 @@ aggregate_pcd = visualization_util.make_point_cloud_o3d(aggregate_pc,
                                         aggregate_rgb,
                                                         normalize_color=True)
 
+# remove table points
+table_normal = np.array([0, 0, 1])
+
+table_height_vector = table_normal * filter_height
+
+# rotate about x axis
+new_normal = R.from_euler("x", table_rotation_x).apply(table_normal)
+
+# filter out table points
+
+mask = np.logical_and((np.array(aggregate_pcd.points) @ new_normal) > workspace_limits[2][0],
+                       (np.array(aggregate_pcd.points) @ new_normal) < workspace_limits[2][1]).copy()
+aggregate_pcd.points = open3d.utility.Vector3dVector(np.array(aggregate_pcd.points)[mask, :])
+aggregate_pcd.colors = open3d.utility.Vector3dVector(np.array(aggregate_pcd.colors)[mask, :])
+
 # remove noise
 aggregate_pcd, idxs = aggregate_pcd.remove_radius_outlier(nb_points=50, radius=0.01)
 
-# aggregate_pc = np.array(aggregate_pcd.points)
+if object_name is not None:
+    d = datetime.datetime.now()
+    filename = f"{d:%m-%d-%Y_%H:%M:%S}_{object_name}.torch".format(d=d, object_name=object_name)
 
-d = datetime.datetime.now()
-filename = f"{d:%m-%d-%Y_%H:%M:%S}_{object_name}.torch".format(d=d, object_name=object_name)
-
-save_dic = dict(points=np.array(aggregate_pcd.points),
-                colors=np.array(aggregate_pcd.colors),
-                object_name=object_name)
+    save_dic = dict(points=np.array(aggregate_pcd.points),
+                    colors=np.array(aggregate_pcd.colors),
+                    object_name=object_name)
 
 
-box = open3d.geometry.TriangleMesh.create_box(width=workspace_limits[0][1]-workspace_limits[0][0],
-                                              height=workspace_limits[1][1]-workspace_limits[1][0],
-                                              depth=.003)
-box.paint_uniform_color([0, 0, 1])
-
-box.translate(-box.get_center())
-
-box.translate([(workspace_limits[0][0] + workspace_limits[0][1])/2,
-               (workspace_limits[1][0] + workspace_limits[1][1])/2,
-               workspace_limits[2][0]])
+# table_box = open3d.geometry.TriangleMesh.create_box(width=workspace_limits[0][1] - workspace_limits[0][0],
+#                                                     height=workspace_limits[1][1]-workspace_limits[1][0],
+#                                                     depth=.003)
+# table_box.paint_uniform_color([0, 0, 1])
+#
+# table_box.translate(-table_box.get_center())
+#
+# table_box.translate([(workspace_limits[0][0] + workspace_limits[0][1]) / 2,
+#                      (workspace_limits[1][0] + workspace_limits[1][1]) / 2,
+#                      workspace_limits[2][0]])
 
 print(np.array(aggregate_pcd.points).mean(axis=0))
+
+obb = open3d.geometry.OrientedBoundingBox()
+obb = obb.create_from_points(aggregate_pcd.points)
+
 open3d.visualization.draw_geometries([aggregate_pcd,
                                       open3d.geometry.TriangleMesh.create_coordinate_frame(.03, [0, 0, 0]),
-                                      box])
+                                      # table_box,
+                                      obb])
 
 torch.save(save_dic, f"../out/samples/{filename}")
