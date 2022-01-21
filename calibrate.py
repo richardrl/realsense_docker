@@ -54,7 +54,10 @@ num_ellipse_horizontal_samples = 24
 End Config
 """
 
+# Charuco board corner point measured with a ruler and using the UR5e URDF
 p_WorldCharucocorner_Measured_dic = dict()
+
+# Charuco board corner point estimated with OpenCV
 p_CameraCharucocorner_Estimated_dic = dict()
 # observed_pix_dic = dict()
 

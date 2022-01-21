@@ -1,6 +1,6 @@
-# Unique features of realsense_multicam.cpp compared to original realsense.cpp
-- Supports multiple cameras visualization and multiple TCP server streaming
-- Sends serial number of camera to TCP server
+# Features
+- Multiple cameras GUI visualization, written in C++ for real-time viewing/speed
+- Stream each camera on different ports
 - Charuco board frame detection and visualization
 - Refactored calibration.py with Spatial Algebra syntax so that it is very clear what transforms are happening
 
@@ -43,7 +43,6 @@ realsense_docker.dockerfile
 realsense_docker_from_source.dockerfile
 - You need to build from source to get the #include/realsense/rs.hpp working
 - OR figure out how to include that directory
-- You need to run andy's realsense.cpp to setup the tcp connection
 
 
 # Camera Calibration Settings
@@ -63,7 +62,7 @@ checkerboard_offset_from_tool is the translation of the Charuco board corner poi
 ![ur5_frames](images/ur5_frames.png)
 
 # Notes
-- Opencv does the axis as bgr instead of rgb
+- Opencv does
 - Use ptype to get type of variable in GDB https://stackoverflow.com/questions/9568201/gdb-show-typeinfo-of-some-data
 - gdb realsense_multicam
 
