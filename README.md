@@ -62,7 +62,7 @@ checkerboard_offset_from_tool is the translation of the Charuco board corner poi
 ![ur5_frames](images/ur5_frames.png)
 
 # Notes
-- Opencv does
+- Opencv does bgr not rgb for frames visualization
 - Use ptype to get type of variable in GDB https://stackoverflow.com/questions/9568201/gdb-show-typeinfo-of-some-data
 - gdb realsense_multicam
 
